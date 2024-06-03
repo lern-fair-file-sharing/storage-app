@@ -1,6 +1,4 @@
-import { on } from "events";
-
-const colors =
+const Colors =
 {
     primary: '#2B4B51', //Dark Green
     secondary: '#82B1B0', //Yellow
@@ -22,4 +20,4 @@ const colors =
     onTagPurple: '#70398A',
 };
 
-export default colors;
+export default Colors;
