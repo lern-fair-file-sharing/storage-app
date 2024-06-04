@@ -187,6 +187,7 @@ const FilesPage = () => {
             <Stack.Screen
                 name="FilesHome"
                 component={FilesHome}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="Folder"
