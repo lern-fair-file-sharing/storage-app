@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
-import { FileData } from "../components/FileCard";
+import FileCard, { FileCardType } from "../components/FileCard";
+import { FolderCardType } from "../components/FolderCard";
+import Colors from "../utils/Colors";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import Folder, { RootStackParamList }  from "../components/Folder";
 
 
 enum FileView {
@@ -14,11 +20,82 @@ enum FileView {
 
 
 interface TimeGroupedFiles {
-    [uploadTime: string]: FileData[];
+    [lastModified: string]: FileCardType[];
 }
 
 
-const FilesPage = () => {
+const dummyFileData: { folders: FolderCardType[], files: FileCardType[] } = {
+    folders: [
+        {
+            folderName: "Mathe mit Frau A.",
+            folderURL: "www.google.com/Mathe mit Frau A.pdf"
+        },
+        {
+            folderName: "Biologie mit Fr B.",
+            folderURL: "www.google.com"
+        }
+    ],
+    files: [
+        {
+            fileName: "geometrie-hausaufgabe.png",
+            fileType: "png",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["mathe", "joe"],
+            lastModified: "l3h"
+        },
+        {
+            fileName: "übung1.pdf",
+            fileType: "pdf",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["mathe", "joe"],
+            lastModified: "l3h"
+        },
+        {
+            fileName: "abc.png",
+            fileType: "png",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["mathe", "joe"],
+            lastModified: "today"
+        },
+        {
+            fileName: "übung3.pdf",
+            fileType: "pdf",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["biologie", "max"],
+            lastModified: "today"
+        },
+        {
+            fileName: "test-blatt.pdf",
+            fileType: "pdf",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["mathe", "joe"],
+            lastModified: "week"
+        },
+        {
+            fileName: "übung5.png",
+            fileType: "png",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["physik", "moritz"],
+            lastModified: "week"
+        },
+        {
+            fileName: "übung1.pdf",
+            fileType: "pdf",
+            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
+            tags: ["mathe", "joe"],
+            lastModified: "week"
+        }
+    ]
+}
+
+const FilesHome = () => {
     const [fileView, setFileView] = useState<FileView>(FileView.Activity);
     const [timeGroupedFiles, setTimeGroupedFiles] = useState<TimeGroupedFiles>();
 
@@ -28,85 +105,30 @@ const FilesPage = () => {
 
     useEffect(() => {
         // TODO create a real function for grouping real file data based on their upload times
-        const groupedFiles: TimeGroupedFiles = dummyFileData.reduce<TimeGroupedFiles>((acc, file) => {
-            const { uploadTime } = file;
-            if (!acc[uploadTime]) {
-                acc[uploadTime] = [];
+        let fileDatra = dummyFileData.files;
+        const groupedFiles: TimeGroupedFiles = fileDatra.reduce<TimeGroupedFiles>((acc, file) => {
+            const { lastModified } = file;
+            if (!acc[lastModified]) {
+                acc[lastModified] = [];
             }
-            acc[uploadTime].push(file);
+            acc[lastModified].push(file);
             return acc;
         }, {});
         setTimeGroupedFiles(groupedFiles);
     }, []);
 
-
-    const dummyFileData: FileData[] = [
-        {
-            fileName: "geometrie-hausaufgabe.png",
-            fileType: "png",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            uploadTime: "l3h"
-        },
-        {
-            fileName: "übung1.pdf",
-            fileType: "pdf",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            uploadTime: "l3h"
-        },
-        {
-            fileName: "abc.png",
-            fileType: "png",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            uploadTime: "today"
-        },
-        {
-            fileName: "übung3.pdf",
-            fileType: "pdf",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["biologie", "max"],
-            uploadTime: "today"
-        },
-        {
-            fileName: "test-blatt.pdf",
-            fileType: "pdf",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            uploadTime: "week"
-        },
-        {
-            fileName: "übung5.png",
-            fileType: "png",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["physik", "moritz"],
-            uploadTime: "week"
-        },
-        {
-            fileName: "übung1.pdf",
-            fileType: "pdf",
-            fileDownloadURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            uploadTime: "week"
-        }
-    ]
-
-    const renderFileListSection = (title: string, files: FileData[]) => (
-        <>
+    const renderFileListSection = (title: string, files: FileCardType[]) => (
+        <View style={styles.fileActivitySection}>
             <Text style={styles.fileActivityTime}>{title}:</Text>
-            <View style={styles.fileActivitySection}>
-                <FileList data={files} />
-            </View>
-        </>
+            {
+                files.map((file: FileCardType, idx: number) => {
+                    return <FileCard key={idx} {...file} />
+                })
+            }
+        </View>
     );
+
+    const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
@@ -134,7 +156,7 @@ const FilesPage = () => {
 
                 <View
                     style={{
-                        borderBottomColor: "#2B4B51",
+                        borderBottomColor: Colors.primary,
                         borderBottomWidth: StyleSheet.hairlineWidth,
                     }}
                 />
@@ -146,12 +168,36 @@ const FilesPage = () => {
                         {timeGroupedFiles?.week && renderFileListSection("Diese Woche", timeGroupedFiles.week)}
                     </ScrollView>
                 ) : (
-                    <View style={styles.courseFolderSection}></View>
+                    <ScrollView style={styles.courseFolderSection}>
+                        <FileList folders={dummyFileData.folders} files={[]}/>
+                    </ScrollView>
                 )}
             </View>
         </View>
     );
 };
+
+
+// Create a stack navigator
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const FilesPage = () => {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen
+                name="FilesHome"
+                component={FilesHome}
+            />
+            <Stack.Screen
+                name="Folder"
+                component={Folder}
+            />
+        </Stack.Navigator>
+    );
+};
+
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -160,7 +206,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        backgroundColor: "#f2f2f2",
+        backgroundColor: "#fff",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -181,14 +227,13 @@ const styles = StyleSheet.create({
         
     },
     fileActivitySection: {
-        marginVertical: 10
+        marginBottom: 10,
+        gap: 7
     },
     fileActivityTime: {
-        color: "#2B4B51"
+        color: Colors.primary
     },
     courseFolderSection: {
-        height: 500,
-        backgroundColor: "gray",
     },
 });
 

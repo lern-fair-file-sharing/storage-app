@@ -1,30 +1,35 @@
 import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { Entypo } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
+import Colors from "../utils/Colors";
+
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/icon.png");
 
 
-export interface FileData {
+export interface FileCardType {
     fileName: string,
     fileType: string,
-    fileDownloadURL: string,
+    fileURL: string,
     filePreviewURL: string,
     tags: string[],
-    uploadTime: string
+    lastModified: string
 }
 
-const FileCard = (props: FileData) => {
+
+const FileCard = (props: FileCardType) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
 
     useEffect(() => {
         // Choose preview image (choices: PDF default, preview image from URL, placeholder image)
         if (props.fileType === "pdf") {
             setPreviewImage(pdfPreviewImage);
-        } else if (!props.filePreviewURL) {
+        }
+        else if (!props.filePreviewURL) {
             setPreviewImage(noPreviewImage);
-        } else {
+        }
+        else {
             setPreviewImage({ uri: props.filePreviewURL });
         }
     }, [props.fileType, props.filePreviewURL]);
@@ -37,7 +42,7 @@ const FileCard = (props: FileData) => {
                 <View style={styles.tagPlaceHolder} />
             </View>
             <Pressable>
-                <Entypo name="dots-three-vertical" size={24} color="#2B4B51" />
+                <Entypo name="dots-three-vertical" size={24} color={Colors.primary} />
             </Pressable>
         </View>
     );
@@ -45,13 +50,13 @@ const FileCard = (props: FileData) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#EDF4F3",
+        backgroundColor: Colors.surface,
         alignItems: "center",
-        minHeight: 40,
+        minHeight: 60,
         width: "100%",
         borderRadius: 3,
         borderWidth: 1,
-        borderColor: "#82B1B0",
+        borderColor: Colors.surfaceOutline,
         display: "flex",
         flexDirection: "row",
         padding: 5,
@@ -68,12 +73,13 @@ const styles = StyleSheet.create({
         gap: 5,
     },
     tagPlaceHolder: {
+        flex: 1,
         backgroundColor: "#cfcfcf",
         height: 20,
     },
     fileName: {
         fontSize: 15,
-        color: "#2B4B51",
+        color: Colors.primary,
     },
 });
 

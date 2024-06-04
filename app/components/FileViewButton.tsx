@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
+import Colors from "../utils/Colors";
 
 
 interface FileViewButtonProps {
@@ -11,7 +12,7 @@ interface FileViewButtonProps {
 
 const FileViewButton = (props: FileViewButtonProps) => {
 
-    const contentColor = props.active ? "white" : "#2B4B51";
+    const contentColor = props.active ? "white" : Colors.primary;
 
     return (
         <Pressable
@@ -33,7 +34,7 @@ const FileViewButton = (props: FileViewButtonProps) => {
 const styles = StyleSheet.create({
     fileViewButton: {
         flex: 1,
-        backgroundColor: "#2B4B51",
+        backgroundColor: Colors.primary,
         padding: 10,
         borderRadius: 3,
         display: "flex",
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 3,
         borderWidth: 1,
-        borderColor: "#2B4B51",
+        borderColor: Colors.primary,
         display: "flex",
         alignItems: "center",
         justifyContent: "center"
