@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, Image, Pressable } from "react-native";
-import { Entypo } from '@expo/vector-icons';
+import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
 

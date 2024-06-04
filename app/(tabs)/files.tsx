@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
 import FileCard, { FileCardType } from "../components/FileCard";
 import { FolderCardType } from "../components/FolderCard";
+import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import Folder, { RootStackParamList }  from "../components/Folder";
 
 
 enum FileView {
@@ -95,7 +93,7 @@ const dummyFileData: { folders: FolderCardType[], files: FileCardType[] } = {
     ]
 }
 
-const FilesHome = () => {
+const FilesTabScreen = () => {
     const [fileView, setFileView] = useState<FileView>(FileView.Activity);
     const [timeGroupedFiles, setTimeGroupedFiles] = useState<TimeGroupedFiles>();
 
@@ -127,8 +125,6 @@ const FilesHome = () => {
             }
         </View>
     );
-
-    const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
@@ -178,20 +174,19 @@ const FilesHome = () => {
 };
 
 
-// Create a stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const FilesPage = () => {
     return (
         <Stack.Navigator>
             <Stack.Screen
-                name="FilesHome"
-                component={FilesHome}
+                name="FilesTabScreen"
+                component={FilesTabScreen}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="Folder"
-                component={Folder}
+                name="FolderContentScreen"
+                component={FolderContentScreen}
             />
         </Stack.Navigator>
     );

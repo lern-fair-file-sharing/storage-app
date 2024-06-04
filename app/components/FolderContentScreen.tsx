@@ -1,22 +1,18 @@
-import { Key, useEffect } from "react";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import FileList from "./FileList";
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FolderCardType } from "./FolderCard";
-import { FileCardType } from "./FileCard";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
-import { useRoute } from '@react-navigation/native';
 import React from "react";
 
 
 
 export type RootStackParamList = {
-    FilesHome: undefined,
-    Folder: { folderURL: string, folderName: string };
+    FilesTabScreen: undefined,
+    FolderContentScreen: { folderURL: string, folderName: string };
 };
 
 
-const Folder = (props: NativeStackScreenProps<RootStackParamList, "Folder">) => {
+const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "FolderContentScreen">) => {
     const navigation = useNavigation();
 
     React.useLayoutEffect(() => {
@@ -68,4 +64,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Folder;
+export default FolderContentScreen;

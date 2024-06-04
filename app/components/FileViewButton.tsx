@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, Text, Pressable } from "react-native";
 import Colors from "../utils/Colors";
 
 

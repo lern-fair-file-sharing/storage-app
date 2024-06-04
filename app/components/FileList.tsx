@@ -1,6 +1,6 @@
 import { useNavigation } from "expo-router";
 import { Key } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View } from "react-native";
 import FileCard, { FileCardType } from "./FileCard";
 import FolderCard, { FolderCardType } from "./FolderCard";
 
@@ -12,7 +12,6 @@ interface FileListType {
 
 
 const FileList = (props: FileListType) => {
-
     const navigation = useNavigation();
 
     return (
