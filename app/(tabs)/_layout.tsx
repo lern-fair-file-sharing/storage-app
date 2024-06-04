@@ -1,25 +1,27 @@
 import { Tabs } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { View } from "react-native";
+import Colors from "../utils/Colors";
+
 
 const TabsLayout = () => {
     return (
         <Tabs screenOptions={{ 
-            tabBarInactiveTintColor: "#2B4B51",
-            tabBarActiveTintColor: "#2B4B51"
+            tabBarInactiveTintColor: Colors.primary,
+            tabBarActiveTintColor: Colors.primary
             }}>
             <Tabs.Screen name="index" options={{
                 headerTitle: "Start",
                 headerTitleAlign: "center",
                 headerTintColor: "white",
                 headerStyle: {
-                    backgroundColor: "#2B4B51"
+                    backgroundColor: Colors.primary
                 },
                 title: "Start",
                 tabBarIcon: ({ focused, color }) => (
                     <View style={{
                       borderRadius: 50,
-                      backgroundColor: focused ? '#2B4B51' : 'transparent',
+                      backgroundColor: focused ? Colors.primary : 'transparent',
                       padding: 6
                     }}>
                       <Ionicons size={22} name="home-outline" color={focused ? 'white' : color} />
@@ -31,13 +33,13 @@ const TabsLayout = () => {
                 headerTitleAlign: "center",
                 headerTintColor: "white",
                 headerStyle: {
-                    backgroundColor: "#2B4B51"
+                    backgroundColor: Colors.primary
                 },
                 title: "Termine",
                 tabBarIcon: ({ focused, color }) => (
                     <View style={{
                         borderRadius: 50,
-                        backgroundColor: focused ? '#2B4B51' : 'transparent',
+                        backgroundColor: focused ? Colors.primary : 'transparent',
                         padding: 6
                     }}>
                         <Ionicons size={22} name="calendar-outline" color={focused ? 'white' : color} />
@@ -49,13 +51,13 @@ const TabsLayout = () => {
                 headerTitleAlign: "center",
                 headerTintColor: "white",
                 headerStyle: {
-                    backgroundColor: "#2B4B51"
+                    backgroundColor: Colors.primary
                 },
                 title: "Chat",
                 tabBarIcon: ({ focused, color }) => (
                     <View style={{
                         borderRadius: 50,
-                        backgroundColor: focused ? '#2B4B51' : 'transparent',
+                        backgroundColor: focused ? Colors.primary : 'transparent',
                         padding: 6
                     }}>
                         <Ionicons size={22} name="chatbox-outline" color={focused ? 'white' : color} />
@@ -67,13 +69,13 @@ const TabsLayout = () => {
                 headerTitleAlign: "center",
                 headerTintColor: "white",
                 headerStyle: {
-                    backgroundColor: "#2B4B51"
+                    backgroundColor: Colors.primary
                 },
                 title: "Kurse",
                 tabBarIcon: ({ focused, color }) => (
                     <View style={{
                         borderRadius: 50,
-                        backgroundColor: focused ? '#2B4B51' : 'transparent',
+                        backgroundColor: focused ? Colors.primary : 'transparent',
                         padding: 6
                     }}>
                         <Ionicons size={22} name="people-outline" color={focused ? 'white' : color} />
@@ -85,13 +87,13 @@ const TabsLayout = () => {
                 headerTitleAlign: "center",
                 headerTintColor: "white",
                 headerStyle: {
-                    backgroundColor: "#2B4B51"
+                    backgroundColor: Colors.primary
                 },
                 title: "Dateien",
                 tabBarIcon: ({ focused, color }) => (
                     <View style={{
                         borderRadius: 50,
-                        backgroundColor: focused ? '#2B4B51' : 'transparent',
+                        backgroundColor: focused ? Colors.primary : 'transparent',
                         padding: 6
                     }}>
                         <Ionicons size={22} name="folder-outline" color={focused ? 'white' : color} />
