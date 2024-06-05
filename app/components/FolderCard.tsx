@@ -1,7 +1,8 @@
 import { StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Colors from "../utils/Colors";
-import { FolderCardType } from "../types/fileTypes";
+import { FolderCardType } from "../types/FileTypes";
+import { getFileList } from "../utils/ServerReqests";
 
 
 const pdfPreviewImage = require("../../assets/folder-icon.png");
@@ -14,6 +15,7 @@ interface FolderNavigationType extends FolderCardType {
 const FolderCard = (props: FolderNavigationType) => {
     const handleFolderPress = () => {
         props.navigation.push("FolderContentScreen", { folderURL: props.folderURL, folderName: props.folderName });
+        getFileList();
     };
 
     return (

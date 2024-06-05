@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
-import { FileCardType } from "../types/fileTypes";
+import { FileCardType } from "../types/FileTypes";
 
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");

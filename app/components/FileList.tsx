@@ -1,7 +1,7 @@
 import { useNavigation } from "expo-router";
 import { Key } from "react";
 import { StyleSheet, View } from "react-native";
-import { FileCardType, FolderCardType, FileListType } from "../types/fileTypes";
+import { FileCardType, FolderCardType, FileListType } from "../types/FileTypes";
 import FileCard from "./FileCard";
 import FolderCard from "./FolderCard";
 
