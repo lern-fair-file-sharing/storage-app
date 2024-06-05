@@ -1,14 +1,10 @@
 import { useNavigation } from "expo-router";
 import { Key } from "react";
 import { StyleSheet, View } from "react-native";
-import FileCard, { FileCardType } from "./FileCard";
-import FolderCard, { FolderCardType } from "./FolderCard";
+import { FileCardType, FolderCardType, FileListType } from "../types/fileTypes";
+import FileCard from "./FileCard";
+import FolderCard from "./FolderCard";
 
-
-interface FileListType {
-    folders: FolderCardType[],
-    files: FileCardType[],
-}
 
 
 const FileList = (props: FileListType) => {

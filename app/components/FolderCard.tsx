@@ -1,14 +1,10 @@
 import { StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Colors from "../utils/Colors";
+import { FolderCardType } from "../types/fileTypes";
 
 
 const pdfPreviewImage = require("../../assets/folder-icon.png");
-
-export interface FolderCardType {
-    folderName: string,
-    folderURL: string,
-}
 
 interface FolderNavigationType extends FolderCardType {
     navigation?: any

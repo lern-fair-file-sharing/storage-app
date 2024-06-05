@@ -2,20 +2,11 @@ import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
+import { FileCardType } from "../types/fileTypes";
 
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/icon.png");
-
-
-export interface FileCardType {
-    fileName: string,
-    fileType: string,
-    fileURL: string,
-    filePreviewURL: string,
-    tags: string[],
-    lastModified: string
-}
 
 
 const FileCard = (props: FileCardType) => {
