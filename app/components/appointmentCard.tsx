@@ -1,6 +1,10 @@
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import { Button } from "react-native";
 import Colors from "../utils/Colors";
+
+const props = {
+    days: 4,
+    classTitle: "Grundlagen der Mathematik",
+}
 
 const AppointmentCard = () => {
     return (
@@ -10,9 +14,9 @@ const AppointmentCard = () => {
                 <View style={styles.timer}>
                     <Image style={styles.clockImage} source={require("../../assets/clock.png")}/>
                     <Text style={styles.textTimer1}>Startet: </Text>
-                    <Text style={styles.textTimer2}>In 4 Tagen</Text>
+                    <Text style={styles.textTimer2}>In {props.days} Tagen</Text>
                 </View>
-                <Text style={styles.text}>Grundlagen der Mathematik</Text>
+                <Text style={styles.text}>{props.classTitle}</Text>
                 <View style={styles.buttons}>
                     <Pressable style={styles.button1}>
                         <Text style={styles.buttonText1}>Mehr Infos</Text>
@@ -49,9 +53,9 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         alignItems: "flex-start",
         padding: 16,
-        paddingBottom: 40
-
-        
+        paddingBottom: 40,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8
     },
     timer: {
         flexDirection: "row",
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
         width:"100%",
     },
     buttonText2: {
-        color: "#a1b1b3",
+        color: Colors.primary,
         fontSize: 16,
         fontWeight: "500",
         alignSelf: "center"
