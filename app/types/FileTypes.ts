@@ -7,7 +7,6 @@ export interface FileCardType {
     fileName: string,
     fileType: string,
     fileURL: string,
-    filePreviewURL: string,
     tags: string[],
     lastModified: string
 }

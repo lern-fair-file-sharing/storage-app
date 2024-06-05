@@ -26,7 +26,6 @@ const FileList = (props: FileListType) => {
                     fileName={fileData.fileName}
                     fileType={fileData.fileType}
                     fileURL={fileData.fileURL}
-                    filePreviewURL={fileData.filePreviewURL}
                     lastModified={fileData.lastModified}
                     tags={fileData.tags}
                 />
