@@ -1,6 +1,7 @@
 const Colors =
 {
     primary: '#2B4B51', //Dark Green
+    onPrimary: "#FFF", //White
     secondary: '#82B1B0', //Mint Green
     yellow: '#FEDA50', //Yellow
     background: '#FFFFFF', //White
