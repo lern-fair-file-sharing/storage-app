@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { getFolderContent } from "../utils/ServerRequests";
 import { FileListType, FolderCardType, FileCardType } from "../types/FileTypes";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -17,6 +18,7 @@ export type RootStackParamList = {
 
 const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "FolderContentScreen">) => {
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -44,7 +46,6 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
         <ScrollView style={styles.container}>
             <FileList folders={allFolders} files={allFiles}/>
         </ScrollView>     
-
     );
 };
 
@@ -60,6 +61,9 @@ const styles = StyleSheet.create({
         padding: 20,
     },
 
+    safeArea: {
+        flex: 1,
+    },
 });
 
 export default FolderContentScreen;
