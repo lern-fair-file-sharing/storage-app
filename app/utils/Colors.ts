@@ -1,10 +1,12 @@
 const Colors =
 {
     primary: '#2B4B51', //Dark Green
-    secondary: '#82B1B0', //Yellow
-    background: '#FFFFFF',
-    surface: '#EDF4F3',
-    surfaceOutline: '#82B1B0',
+    onPrimary: "#FFF", //White
+    secondary: '#82B1B0', //Mint Green
+    yellow: '#FEDA50', //Yellow
+    background: '#FFFFFF', //White
+    surface: '#EDF4F3', //Light Mint Green
+    surfaceOutline: '#82B1B0', //Mint Green
 
     tagRed: '#E56C6C',
     tagOrange: '#E6AE5A',
