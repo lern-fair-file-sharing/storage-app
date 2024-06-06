@@ -8,7 +8,7 @@ type ItemProps = {
 
 const AppointmentCard = ({days, classTitle}: ItemProps) => {
     return (
-        <View>
+        <View style={styles.container}>
             <Image style={styles.image} source={require("../../assets/appointmentImage.jpg")}/>
             <View style={styles.card}>
                 <View style={styles.timer}>
@@ -31,6 +31,9 @@ const AppointmentCard = ({days, classTitle}: ItemProps) => {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        width: 360,
+    },
     image: {
         width: "auto",
         height: 160,

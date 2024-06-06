@@ -32,23 +32,11 @@ const ConfirmationData = [
     }
 ];
 
-const AppointmentData = [
-    {
-        id: "1",
-        days: 4,
-        classTitle: "Grundlagen der Mathematik",
-    },
-    {
-        id: "2",
-        days: 8,
-        classTitle: "Einführung in die Informatik",
-    },
-    {
-        id: "3",
-        days: 12,
-        classTitle: "Englisch für Anfänger",
-    }
-];
+const AppointmentData = {
+    days: 4,
+    classTitle: "Grundlagen der Mathematik",
+};
+
 
 const StartPage = () => {
     return (
@@ -80,19 +68,7 @@ const StartPage = () => {
                 />
                 <View style={styles.nextAppointment}>
                     <Text style={styles.nextAppointmentText}>Nächster Termin</Text>
-                    <FlatList
-                    data={AppointmentData}
-                    renderItem={({ item }) => (
-                        <AppointmentCard
-                            days={item.days}
-                            classTitle={item.classTitle}
-                        />
-                    )}
-                    keyExtractor={(item) => item.id}
-                    showsVerticalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
-                    contentContainerStyle={styles.flatListContentAppointments}
-                />
+                    <AppointmentCard days={AppointmentData.days} classTitle={AppointmentData.classTitle} />
                 </View>
             </ScrollView>
         </View>
@@ -140,13 +116,14 @@ const styles = StyleSheet.create({
     },
     nextAppointment: {
         marginTop: 16,
+        paddingHorizontal: 16,
+        paddingBottom: 20,
     },
     nextAppointmentText: {
         fontSize: 20,
         fontWeight: "700",
         color: Colors.primary,
         marginBottom: 16,
-        paddingHorizontal: 16,
     },
 });
 
