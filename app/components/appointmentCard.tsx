@@ -1,22 +1,22 @@
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import Colors from "../utils/Colors";
 
-const props = {
-    days: 4,
-    classTitle: "Grundlagen der Mathematik",
-}
+type ItemProps = {
+    days: number,
+    classTitle: string
+};
 
-const AppointmentCard = () => {
+const AppointmentCard = ({days, classTitle}: ItemProps) => {
     return (
-        <View style={styles.container}>
-                <Image style={styles.image} source={require("../../assets/appointmentImage.jpg")}/>
+        <View>
+            <Image style={styles.image} source={require("../../assets/appointmentImage.jpg")}/>
             <View style={styles.card}>
                 <View style={styles.timer}>
                     <Image style={styles.clockImage} source={require("../../assets/clock.png")}/>
                     <Text style={styles.textTimer1}>Startet: </Text>
-                    <Text style={styles.textTimer2}>In {props.days} Tagen</Text>
+                    <Text style={styles.textTimer2}>In {days} Tagen</Text>
                 </View>
-                <Text style={styles.text}>{props.classTitle}</Text>
+                <Text style={styles.text}>{classTitle}</Text>
                 <View style={styles.buttons}>
                     <Pressable style={styles.button1}>
                         <Text style={styles.buttonText1}>Mehr Infos</Text>
@@ -31,9 +31,6 @@ const AppointmentCard = () => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 16,
-    },
     image: {
         width: "auto",
         height: 160,

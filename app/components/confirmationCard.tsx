@@ -1,11 +1,6 @@
 import { Text, StyleSheet, Image, Pressable } from 'react-native';
 import Colors from '../utils/Colors';
 
-const props = {
-    name: "Leon",
-    text: " hat uns um eine Bescheinigung für eure Lernunterstützung gebeten. Nur wenn du dies bestätigst, können wir diesen Wunsch erfüllen."
-}
-
 type ItemProps = {
     subject: string
     name: string | null,

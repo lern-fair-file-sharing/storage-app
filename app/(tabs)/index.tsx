@@ -3,11 +3,9 @@ import ConfirmationCard from "../components/confirmationCard";
 import AppointmentCard from "../components/appointmentCard";
 import Colors from "../utils/Colors";
 
-const props = {
-    name: "Stephan"
-}
+const name = "Stephan";
 
-const Data = [
+const ConfirmationData = [
     {
         id: "1",
         subject: "Nachhilfe mit ",
@@ -32,47 +30,83 @@ const Data = [
         body: "Max hat um eine Rückmeldung zu seinen letzten Lernstunden gebeten. Bitte bestätige, dass du seine Leistung bewerten möchtest.",
         linkText: "Feedback geben"
     }
-    
+];
+
+const AppointmentData = [
+    {
+        id: "1",
+        days: 4,
+        classTitle: "Grundlagen der Mathematik",
+    },
+    {
+        id: "2",
+        days: 8,
+        classTitle: "Einführung in die Informatik",
+    },
+    {
+        id: "3",
+        days: 12,
+        classTitle: "Englisch für Anfänger",
+    }
 ];
 
 const StartPage = () => {
     return (
-        <ScrollView style={styles.pageContainer} showsVerticalScrollIndicator={false}>
-            <View style={styles.greeting}>
-                <Text style={styles.greetingText}>Hallo {props.name}!</Text>
-            </View>
-            <View style={{height: 40}}/>
-            <View style={styles.nextSteps}>
-                <Text style={styles.nextStepsHeadline}>Deine nächsten Schritte</Text>
-                <Text style={styles.nextStepsSub}>Alle Fortschritte anzeigen</Text>
-            </View>
-            <View style={styles.confirmationCardScrollView}>
+        <View style={styles.pageContainer}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.greeting}>
+                    <Text style={styles.greetingText}>Hallo {name}!</Text>
+                </View>
+                <View style={styles.nextSteps}>
+                    <Text style={styles.nextStepsHeadline}>Deine nächsten Schritte</Text>
+                    <Text style={styles.nextStepsSub}>Alle Fortschritte anzeigen</Text>
+                </View>
                 <FlatList
-                    data={Data}
-                    renderItem={({item}) => <ConfirmationCard subject={item.subject} name={item.name} headline={item.headline} body={item.body} linkText={item.linkText}/>}
-                    keyExtractor={item => item.id}
+                    data={ConfirmationData}
+                    renderItem={({ item }) => (
+                        <ConfirmationCard
+                            subject={item.subject}
+                            name={item.name}
+                            headline={item.headline}
+                            body={item.body}
+                            linkText={item.linkText}
+                        />
+                    )}
+                    keyExtractor={(item) => item.id}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <View style={{width: 16}}/>}
+                    ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+                    contentContainerStyle={styles.flatListContentConfirmation}
                 />
-            </View>
-            <View style={{height: 20}}/>
-            <View style={styles.nextAppointment}>
-                <Text style={styles.nextAppointmentText}>Nächster Termin</Text>
-            </View>
-            <AppointmentCard/>
-        </ScrollView>
-    )
+                <View style={styles.nextAppointment}>
+                    <Text style={styles.nextAppointmentText}>Nächster Termin</Text>
+                    <FlatList
+                    data={AppointmentData}
+                    renderItem={({ item }) => (
+                        <AppointmentCard
+                            days={item.days}
+                            classTitle={item.classTitle}
+                        />
+                    )}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={false}
+                    ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+                    contentContainerStyle={styles.flatListContentAppointments}
+                />
+                </View>
+            </ScrollView>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
     pageContainer: {
-        backgroundColor: Colors.background
+        backgroundColor: Colors.background,
     },
     greeting: {
         backgroundColor: Colors.primary,
         padding: 25,
-        borderWidth: 0
+        marginBottom: 10,
     },
     greetingText: {
         fontWeight: "700",
@@ -82,36 +116,38 @@ const styles = StyleSheet.create({
     nextSteps: {
         paddingVertical: 8,
         paddingHorizontal: 16,
+        marginBottom: 16,
     },
     nextStepsHeadline: {
         fontWeight: "700",
         fontSize: 20,
-        color: Colors.primary
+        color: Colors.primary,
     },
     nextStepsSub: {
         color: Colors.primary,
-        textDecorationLine: "underline"
+        textDecorationLine: "underline",
     },
-    confirmationCardScrollView: {
-        flexDirection: "row",
-        display: "flex",
-        flexWrap: "nowrap",
+    flatListContentConfirmation: {
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 16,
     },
-    cardContainer: {
-        marginRight: 16
+    flatListContentAppointments: {
+        paddingHorizontal: 16,
+        paddingBottom: 20
+    },
+    cardSeparator: {
+        width: 16,
+        height: 16,
     },
     nextAppointment: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        marginTop: 16,
     },
     nextAppointmentText: {
         fontSize: 20,
         fontWeight: "700",
-        color: Colors.primary
-    }
-})
+        color: Colors.primary,
+        marginBottom: 16,
+        paddingHorizontal: 16,
+    },
+});
 
 export default StartPage;
