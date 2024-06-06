@@ -2,6 +2,12 @@ import { FolderCardType, FileCardType, FileListType } from "../types/FileTypes";
 import { PropfindResponseType, PropSearchResponseType } from "../types/ResponseTypes";
 
 var parseString = require('react-native-xml2js').parseString;
+const machineIP = "192.168.178.21";
+const machinePort = "8080";
+const machineURL = "http://" + machineIP + ":" + machinePort;
+const user = "testuser";
+const userpath = "/files/" + user;
+
 
 // This function is used to get the list of files and folders from the server
 // The function returns a promise that resolves to a FileListType object
@@ -25,7 +31,7 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
         files: []
     };
 
-    fetch("http://192.168.178.21:8080" + directory, requestOptions as RequestInit)
+    fetch(machineURL + directory, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {
             parseString(result, function (err: any, result: any) {
@@ -58,6 +64,7 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
 
                 });
             });
+            console.log(fileList);
             return fileList
         })
         .catch((error) => console.error(error));
@@ -69,7 +76,7 @@ export const searchLatestFiles = async(): Promise<FileListType | void> => {
     requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
     requestHeaders.append("Cookie", "nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=CiAfDImx%2B6zTIOvuv%2BOLXvLAfgd4EHh9VojUTooSI43RBwjQ00JoR884lKxyQUPRoGf21SqCCWTftnnsy3HOYhTEmlUE0lAom8qdV2xY6w1JJVJaTW%2BqG20Fd7jDqrA3; ocetqxf0qy6c=ec7939819be7340d23717f5a5ec29421");
 
-    const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>/files/testuser</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
+    const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>" + userpath + "</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
 
     const requestOptions = {
         method: "SEARCH",
@@ -83,7 +90,7 @@ export const searchLatestFiles = async(): Promise<FileListType | void> => {
         files: []
     };
 
-    fetch("http://192.168.178.21:8080/remote.php/dav", requestOptions as RequestInit)
+    fetch(machineURL +"/remote.php/dav", requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {
             parseString(result, function (err: any, result: any) {
@@ -99,6 +106,7 @@ export const searchLatestFiles = async(): Promise<FileListType | void> => {
                     fileList.files.push(file);
                 });
             });
+            console.log(fileList);
             return fileList;
         })
         .catch((error) => console.error(error));
