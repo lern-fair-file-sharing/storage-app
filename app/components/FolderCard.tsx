@@ -15,8 +15,8 @@ interface FolderNavigationType extends FolderCardType {
 const FolderCard = (props: FolderNavigationType) => {
     const handleFolderPress = () => {
         props.navigation.push("FolderContentScreen", { folderURL: props.folderURL, folderName: props.folderName });
-        getFileList("/remote.php/dav/files/testuser");
-        //searchLatestFile();
+        //getFileList("/remote.php/dav/files/testuser");
+        searchLatestFile();
     };
 
     return (

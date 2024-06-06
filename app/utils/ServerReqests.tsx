@@ -70,7 +70,7 @@ export const searchLatestFile = async(): Promise<FileListType | void> => {
     requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
     requestHeaders.append("Cookie", "nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=CiAfDImx%2B6zTIOvuv%2BOLXvLAfgd4EHh9VojUTooSI43RBwjQ00JoR884lKxyQUPRoGf21SqCCWTftnnsy3HOYhTEmlUE0lAom8qdV2xY6w1JJVJaTW%2BqG20Fd7jDqrA3; ocetqxf0qy6c=ec7939819be7340d23717f5a5ec29421");
 
-    const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>/files/testuser</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
+    const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>/files/testuser</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
 
     const requestOptions = {
         method: "SEARCH",
@@ -89,28 +89,18 @@ export const searchLatestFile = async(): Promise<FileListType | void> => {
         .then((result) => {
             parseString(result, function (err: any, result: any) {
                 result as PropSearchResponseType;
-                console.log(result["d:multistatus"]["d:response"]);
                 result["d:multistatus"]["d:response"].forEach((element: any) => {
                     let file: FileCardType = {
-                        fileName: "test",
-                        fileType: element["d:propstat"][0]["d:prop"][0]["d:getcontenttype"][0],
-                        fileURL: element["d:href"][0],
-                        tags: [],
-                        lastModified: element["d:propstat"][0]["d:prop"][0]["d:getlastmodified"][0]
-
-                        /*
                         fileName: element["d:propstat"][0]["d:prop"][0]["d:displayname"][0],
                         fileType: element["d:propstat"][0]["d:prop"][0]["d:getcontenttype"][0],
                         fileURL: element["d:href"][0],
-                        filePreviewURL: "",
                         tags: element["d:propstat"][0]["d:prop"][0]["oc:tags"][0].split(","),
                         lastModified: element["d:propstat"][0]["d:prop"][0]["d:getlastmodified"][0]
-                        */
                     };
                     fileList.files.push(file);
                 });
             });
-            //console.log(fileList);
+            console.log(fileList);
         })
         .catch((error) => console.error(error));
 };  
