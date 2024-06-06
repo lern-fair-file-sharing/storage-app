@@ -31,7 +31,7 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
         files: []
     };
 
-    fetch(machineURL + directory, requestOptions as RequestInit)
+    return fetch(machineURL + directory, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {
             parseString(result, function (err: any, result: any) {
@@ -64,13 +64,13 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
 
                 });
             });
-            console.log(fileList);
+            //console.log(fileList);
             return fileList
         })
         .catch((error) => console.error(error));
 };
 
-export const searchLatestFiles = async(): Promise<FileListType | void> => {
+export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("content-Type", "text/xml");
     requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
@@ -85,12 +85,9 @@ export const searchLatestFiles = async(): Promise<FileListType | void> => {
         redirect: "follow"
     };
 
-    let fileList: FileListType = {
-        folders: [],
-        files: []
-    };
+    let fileList: FileCardType[] = [];
 
-    fetch(machineURL +"/remote.php/dav", requestOptions as RequestInit)
+    return fetch(machineURL +"/remote.php/dav", requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {
             parseString(result, function (err: any, result: any) {
@@ -103,10 +100,10 @@ export const searchLatestFiles = async(): Promise<FileListType | void> => {
                         tags: element["d:propstat"][0]["d:prop"][0]["oc:tags"][0].split(","),
                         lastModified: element["d:propstat"][0]["d:prop"][0]["d:getlastmodified"][0]
                     };
-                    fileList.files.push(file);
+                    fileList.push(file);
                 });
             });
-            console.log(fileList);
+            //console.log(fileList);
             return fileList;
         })
         .catch((error) => console.error(error));

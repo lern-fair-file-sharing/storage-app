@@ -2,7 +2,7 @@ import { StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Colors from "../utils/Colors";
 import { FolderCardType } from "../types/FileTypes";
-import { getFolderContent, searchLatestFiles } from "../utils/ServerReqests";
+import { getFolderContent, searchLatestFiles } from "../utils/ServerRequests";
 
 
 const pdfPreviewImage = require("../../assets/folder-icon.png");
@@ -13,15 +13,15 @@ interface FolderNavigationType extends FolderCardType {
 
 
 const FolderCard = (props: FolderNavigationType) => {
-    const handleFolderPress = () => {
+    const handleFolderPress = async() => {
         props.navigation.push("FolderContentScreen", { folderURL: props.folderURL, folderName: props.folderName });
-        getFolderContent("/remote.php/dav/files/testuser").then((result) => {
-            console.log(result);
-        });
-        searchLatestFiles().then((result) => {
-            console.log(result);
-        });
+
+        //const content = await getFolderContent("/remote.php/dav/files/testuser");
+        //const results = await searchLatestFiles();
+        //console.log(content, results);
     };
+
+    
 
     return (
         <TouchableOpacity
