@@ -18,7 +18,7 @@ const FileCard = (props: FileCardType) => {
         if (props.fileType === "application/pdf") {
             setPreviewImage(pdfPreviewImage);
         }
-        else if (props.fileType === "image/jpeg" || props.fileType === "image/png") {
+        else if (props.fileType === "image/jpg" || props.fileType === "image/png") {
             setPreviewImage({ uri: props.fileURL });
         }
         else {

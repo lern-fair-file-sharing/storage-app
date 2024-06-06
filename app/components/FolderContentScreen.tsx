@@ -5,6 +5,7 @@ import { useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { getFolderContent } from "../utils/ServerRequests";
 import { FileListType, FolderCardType, FileCardType } from "../types/FileTypes";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -29,7 +30,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
     useEffect(() => {
         const fetchFolderContent = async () => {
             const content = await getFolderContent(props.route.params?.folderURL);
-            console.log(content);
+            //console.log(content);
             if (content) {
                 setAllFiles(content.files);
                 setAllFolders(content.folders);
@@ -42,7 +43,8 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
     return (
         <ScrollView style={styles.container}>
             <FileList folders={allFolders} files={allFiles}/>
-        </ScrollView>
+        </ScrollView>     
+
     );
 };
 
@@ -57,6 +59,7 @@ const styles = StyleSheet.create({
         gap: 7,
         padding: 20,
     },
+
 });
 
 export default FolderContentScreen;
