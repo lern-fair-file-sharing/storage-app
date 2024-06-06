@@ -32,7 +32,7 @@ const AppointmentCard = ({days, classTitle}: ItemProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        width: 360,
+        width: "100%",
     },
     image: {
         width: "auto",
