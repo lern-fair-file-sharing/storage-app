@@ -37,7 +37,6 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                 fileName: "geometrie-hausaufgabe.png",
                 fileType: "png",
                 fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-                filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
                 tags: ["mathe", "joe"],
                 lastModified: "l3h"
             }

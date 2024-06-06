@@ -5,7 +5,7 @@ var parseString = require('react-native-xml2js').parseString;
 
 // This function is used to get the list of files and folders from the server
 // The function returns a promise that resolves to a FileListType object
-export const getFileList = async (directory: string): Promise<FileListType | void> => {
+export const getFolderContent = async (directory: string): Promise<FileListType | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Content-Type", "text/plain");
     requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
@@ -58,13 +58,12 @@ export const getFileList = async (directory: string): Promise<FileListType | voi
 
                 });
             });
-            console.log(fileList);
             return fileList
         })
         .catch((error) => console.error(error));
 };
 
-export const searchLatestFile = async(): Promise<FileListType | void> => {
+export const searchLatestFiles = async(): Promise<FileListType | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("content-Type", "text/xml");
     requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
@@ -100,7 +99,7 @@ export const searchLatestFile = async(): Promise<FileListType | void> => {
                     fileList.files.push(file);
                 });
             });
-            console.log(fileList);
+            return fileList;
         })
         .catch((error) => console.error(error));
 };  
