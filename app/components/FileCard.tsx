@@ -2,37 +2,29 @@ import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
-
+import { searchLatestFiles } from "../utils/ServerRequests";
+import { FileCardType, FolderCardType, FileListType } from "../types/FileTypes";
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/icon.png");
 
 
-export interface FileCardType {
-    fileName: string,
-    fileType: string,
-    fileURL: string,
-    filePreviewURL: string,
-    tags: string[],
-    lastModified: string
-}
-
-
 const FileCard = (props: FileCardType) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
 
+
     useEffect(() => {
         // Choose preview image (choices: PDF default, preview image from URL, placeholder image)
-        if (props.fileType === "pdf") {
+        if (props.fileType === "application/pdf") {
             setPreviewImage(pdfPreviewImage);
         }
-        else if (!props.filePreviewURL) {
-            setPreviewImage(noPreviewImage);
+        else if (props.fileType === "image/jpg" || props.fileType === "image/png") {
+            setPreviewImage({ uri: props.fileURL });
         }
         else {
-            setPreviewImage({ uri: props.filePreviewURL });
+            setPreviewImage(noPreviewImage);
         }
-    }, [props.fileType, props.filePreviewURL]);
+    }, [props.fileType, props.fileURL]);
 
     return (
         <View style={styles.container}>

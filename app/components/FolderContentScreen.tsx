@@ -2,7 +2,11 @@ import { StyleSheet, ScrollView } from "react-native";
 import FileList from "./FileList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getFolderContent } from "../utils/ServerRequests";
+import { FileListType, FolderCardType, FileCardType } from "../types/FileTypes";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -14,6 +18,7 @@ export type RootStackParamList = {
 
 const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "FolderContentScreen">) => {
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -21,33 +26,25 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
         });
     }, [navigation]);
 
-    const dummyData = {
-        folders: [
-            {
-                folderName: "Mathe mit Frau A.",
-                folderURL: "www.google.com"
-            },
-            {
-                folderName: "Biologie mit Fr B.",
-                folderURL: "www.google.com"
+    const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
+    const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
+
+    useEffect(() => {
+        const fetchFolderContent = async () => {
+            const content = await getFolderContent(props.route.params?.folderURL);
+            if (content) {
+                setAllFiles(content.files);
+                setAllFolders(content.folders);
             }
-        ],
-        files: [
-            {
-                fileName: "geometrie-hausaufgabe.png",
-                fileType: "png",
-                fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-                filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-                tags: ["mathe", "joe"],
-                lastModified: "l3h"
-            }
-        ]
-    }
+        };
+        fetchFolderContent();
+    }, []);
+    
 
     return (
         <ScrollView style={styles.container}>
-            <FileList folders={dummyData.folders} files={dummyData.files}/>
-        </ScrollView>
+            <FileList folders={allFolders} files={allFiles}/>
+        </ScrollView>     
     );
 };
 
@@ -61,6 +58,10 @@ const styles = StyleSheet.create({
         display: "flex",
         gap: 7,
         padding: 20,
+    },
+
+    safeArea: {
+        flex: 1,
     },
 });
 

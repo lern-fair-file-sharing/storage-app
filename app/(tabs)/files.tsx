@@ -5,10 +5,11 @@ import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
-import FileCard, { FileCardType } from "../components/FileCard";
-import { FolderCardType } from "../components/FolderCard";
+import FileCard from "../components/FileCard";
+import { FileCardType, FileListType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
+import { getFolderContent, searchLatestFiles } from "../utils/ServerRequests";
 
 
 enum FileView {
@@ -22,98 +23,36 @@ interface TimeGroupedFiles {
 }
 
 
-const dummyFileData: { folders: FolderCardType[], files: FileCardType[] } = {
-    folders: [
-        {
-            folderName: "Mathe mit Frau A.",
-            folderURL: "www.google.com/Mathe mit Frau A.pdf"
-        },
-        {
-            folderName: "Biologie mit Fr B.",
-            folderURL: "www.google.com"
-        }
-    ],
-    files: [
-        {
-            fileName: "geometrie-hausaufgabe.png",
-            fileType: "png",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            lastModified: "l3h"
-        },
-        {
-            fileName: "übung1.pdf",
-            fileType: "pdf",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            lastModified: "l3h"
-        },
-        {
-            fileName: "abc.png",
-            fileType: "png",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            lastModified: "today"
-        },
-        {
-            fileName: "übung3.pdf",
-            fileType: "pdf",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["biologie", "max"],
-            lastModified: "today"
-        },
-        {
-            fileName: "test-blatt.pdf",
-            fileType: "pdf",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            lastModified: "week"
-        },
-        {
-            fileName: "übung5.png",
-            fileType: "png",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["physik", "moritz"],
-            lastModified: "week"
-        },
-        {
-            fileName: "übung1.pdf",
-            fileType: "pdf",
-            fileURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            filePreviewURL: "https://i.pinimg.com/736x/d8/27/a3/d827a3a7acd4f727f8f4f2c45e2cb309.jpg",
-            tags: ["mathe", "joe"],
-            lastModified: "week"
-        }
-    ]
-}
-
 const FilesTabScreen = () => {
     const [fileView, setFileView] = useState<FileView>(FileView.Activity);
     const [timeGroupedFiles, setTimeGroupedFiles] = useState<TimeGroupedFiles>();
+    const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
+    const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
+    const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
+
+
+    useEffect(() => {
+        const fetchFolderContent = async () => {
+            const content = await getFolderContent("/remote.php/dav/files/testuser/");
+            if (content) {
+                setAllFiles(content.files);
+                setAllFolders(content.folders);
+            }
+        };
+        const fetchLatestFiles = async () => {
+            const results = await searchLatestFiles();
+            if (results) {
+                setLatestFiles(results);
+            }
+        };
+        fetchFolderContent();
+        fetchLatestFiles();
+    }, []);
+
 
     const toggleFileView = () => {
         setFileView(fileView === FileView.Courses ? FileView.Activity : FileView.Courses);
     };
-
-    useEffect(() => {
-        // TODO create a real function for grouping real file data based on their upload times
-        let fileDatra = dummyFileData.files;
-        const groupedFiles: TimeGroupedFiles = fileDatra.reduce<TimeGroupedFiles>((acc, file) => {
-            const { lastModified } = file;
-            if (!acc[lastModified]) {
-                acc[lastModified] = [];
-            }
-            acc[lastModified].push(file);
-            return acc;
-        }, {});
-        setTimeGroupedFiles(groupedFiles);
-    }, []);
 
     const renderFileListSection = (title: string, files: FileCardType[]) => (
         <View style={styles.fileActivitySection}>
@@ -159,13 +98,13 @@ const FilesTabScreen = () => {
 
                 {fileView === FileView.Activity ? (
                     <ScrollView style={styles.timeBasedFileActivities}>
-                        {timeGroupedFiles?.l3h && renderFileListSection("Letzte 3 Stunden", timeGroupedFiles.l3h)}
-                        {timeGroupedFiles?.today && renderFileListSection("Heute", timeGroupedFiles.today)}
-                        {timeGroupedFiles?.week && renderFileListSection("Diese Woche", timeGroupedFiles.week)}
+                        {renderFileListSection("Letzte 3 Stunden", latestFiles.slice(0, 3))}
+                        {renderFileListSection("Heute", latestFiles.slice(3, 6))}
+                        {renderFileListSection("Diese Woche", latestFiles.slice(6, 9))}
                     </ScrollView>
                 ) : (
                     <ScrollView style={styles.courseFolderSection}>
-                        <FileList folders={dummyFileData.folders} files={[]}/>
+                        <FileList folders={allFolders} files={allFiles}/>
                     </ScrollView>
                 )}
             </View>
