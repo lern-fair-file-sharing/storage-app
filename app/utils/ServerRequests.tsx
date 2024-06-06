@@ -64,7 +64,6 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
 
                 });
             });
-            //console.log(fileList);
             return fileList
         })
         .catch((error) => console.error(error));
@@ -103,7 +102,6 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
                     fileList.push(file);
                 });
             });
-            //console.log(fileList);
             return fileList;
         })
         .catch((error) => console.error(error));

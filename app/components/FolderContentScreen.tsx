@@ -32,7 +32,6 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
     useEffect(() => {
         const fetchFolderContent = async () => {
             const content = await getFolderContent(props.route.params?.folderURL);
-            //console.log(content);
             if (content) {
                 setAllFiles(content.files);
                 setAllFolders(content.folders);
