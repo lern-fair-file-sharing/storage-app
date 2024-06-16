@@ -106,3 +106,62 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
         })
         .catch((error) => console.error(error));
 };  
+
+
+export const downloadFile = async (fileURL: string): Promise<File | void> => {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+    myHeaders.append("Cookie", "cookie_test=test; nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=BiSJVa81dNqaIIaCA7k36FJXwxusAFSALWyyiGk52pHV7nV339Wmgo5e7eSSCOrBH0AeypQT8zUro0y6ovNio2PTT6hiux7Fui5YY1gr2KYqwU%2Bhy9J9nguW0BnXYblA; ocb7n3dsvjtl=911143431525cc4a0017cee2a15cb767");
+
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    fetch("http://localhost:8080/remote.php/dav/files/testuser/Nextcloud%20Manual.pdf", requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.error(error));
+}
+
+export const deleteFile = async (fileURL: string): Promise<boolean | void> => {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+    myHeaders.append("Cookie", "cookie_test=test; nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=BiSJVa81dNqaIIaCA7k36FJXwxusAFSALWyyiGk52pHV7nV339Wmgo5e7eSSCOrBH0AeypQT8zUro0y6ovNio2PTT6hiux7Fui5YY1gr2KYqwU%2Bhy9J9nguW0BnXYblA; ocb7n3dsvjtl=911143431525cc4a0017cee2a15cb767");
+
+    const raw = "";
+
+    const requestOptions = {
+        method: "DELETE",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch("http://localhost:8080/remote.php/dav/files/testuser/UploadedReadme.md", requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.error(error));
+}
+
+export const uploadFile = async (file: File): Promise<any | void> => {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "text/plain");
+    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+    myHeaders.append("Cookie", "cookie_test=test; nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=BiSJVa81dNqaIIaCA7k36FJXwxusAFSALWyyiGk52pHV7nV339Wmgo5e7eSSCOrBH0AeypQT8zUro0y6ovNio2PTT6hiux7Fui5YY1gr2KYqwU%2Bhy9J9nguW0BnXYblA; ocb7n3dsvjtl=911143431525cc4a0017cee2a15cb767");
+
+    const raw = "# Hello\r\nThis is a test if I can upload that stuff easily";
+
+    const requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch("http://localhost:8080/remote.php/dav/files/testuser/UploadedReadme.md", requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.error(error));
+}
