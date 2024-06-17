@@ -127,7 +127,7 @@ export const deleteItem = async (fileURL: string): Promise<boolean | void> => {
         .catch((error) => {console.error(error); return false});
 }
 
-export const createFolder = async (folderName: string): Promise<boolean | void> => {
+export const createFolder = async (folderPath: string): Promise<boolean | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
@@ -137,7 +137,7 @@ export const createFolder = async (folderName: string): Promise<boolean | void> 
         redirect: "follow"
     };
 
-    fetch(machineURL+folderName, requestOptions as RequestInit)
+    fetch(machineURL+folderPath, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {return true})
         .catch((error) => {console.error(error); return false});
