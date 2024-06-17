@@ -9,7 +9,7 @@ import FileCard from "../components/FileCard";
 import { FileCardType, FileListType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
-import { getFolderContent, searchLatestFiles, deleteItem, createFolder} from "../utils/ServerRequests";
+import { getFolderContent, searchLatestFiles, deleteItem, createFolder, uploadFile} from "../utils/ServerRequests";
 
 
 enum FileView {
@@ -53,10 +53,15 @@ const FilesTabScreen = () => {
             const result = await createFolder("/remote.php/dav/files/testuser/Documents/TestFolder");
             console.log(result);
         };
+        const uploadFileTest = async () => {
+            const result = await uploadFile(new Blob(["Whoa, i'm such a great new blob"]), "/remote.php/dav/files/testuser/Documents/TestFolder/TestFile.txt");
+            console.log(result);
+        };
         fetchFolderContent();
         fetchLatestFiles();
         deleteFileTest();
         createFolderTest();
+        uploadFileTest();
     }, []);
 
 
