@@ -1,5 +1,8 @@
 import { FolderCardType, FileCardType, FileListType } from "../types/FileTypes";
 import { PropfindResponseType, PropSearchResponseType } from "../types/ResponseTypes";
+import * as FileSystem from "expo-file-system";
+import { StorageAccessFramework } from "expo-file-system";
+import { Alert } from 'react-native';
 import Constants from "expo-constants";
 var parseString = require("react-native-xml2js").parseString;
 
@@ -108,4 +111,61 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
             return fileList;
         })
         .catch((error) => console.error(error));
-};  
+};
+
+
+export const fetchFile = async (fileURL: string): Promise<string | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: requestHeaders,
+        redirect: "follow"
+    };
+
+    try {
+        const response = await fetch(`${machineURL}${fileURL}`, requestOptions);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error - status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+export const downloadFile = async (fileURL: string): Promise<any | void> => {
+    try {
+        const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!permissions.granted) {
+            Alert.alert("Download Failed", "You need to give storage permission to download the file.");
+            return;
+        }
+
+        const base64Data = await fetchFile(fileURL);
+        if (!base64Data) {
+            throw new Error("Failed to fetch file content");
+        }
+
+        const filePath = `${FileSystem.documentDirectory}${fileURL.split("/").pop()}`
+        await FileSystem.writeAsStringAsync(filePath, base64Data.split(',')[1], {
+            encoding: FileSystem.EncodingType.Base64,
+        });
+        Alert.alert("File Downloaded", `File has been downloaded to ${filePath}`);
+    } catch (error) {
+        console.error(error);
+        Alert.alert("Download Failed", "An error occurred while downloading the file.");
+    }
+}
+
+
