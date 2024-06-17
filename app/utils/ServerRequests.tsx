@@ -76,7 +76,7 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
 export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("content-Type", "text/xml");
-    requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
     const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>" + userpath + "</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
 
@@ -111,57 +111,54 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
 };  
 
 
-export const downloadFile = async (fileURL: string): Promise<File | void> => {
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
-
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow"
-    };
-
-    fetch("http://localhost:8080/remote.php/dav/files/testuser/Nextcloud%20Manual.pdf", requestOptions as RequestInit)
-        .then((response) => response.text())
-        .then((result) => console.log(result))
-        .catch((error) => console.error(error));
-}
-
-export const deleteFile = async (fileURL: string): Promise<boolean | void> => {
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
-
-    const raw = "";
+export const deleteItem = async (fileURL: string): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
     const requestOptions = {
         method: "DELETE",
-        headers: myHeaders,
-        body: raw,
+        headers: requestHeaders,
         redirect: "follow"
     };
 
-    fetch("http://localhost:8080/remote.php/dav/files/testuser/UploadedReadme.md", requestOptions as RequestInit)
+    fetch(machineURL+fileURL, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => console.log(result))
-        .catch((error) => console.error(error));
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
 }
 
-export const uploadFile = async (file: File): Promise<any | void> => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "text/plain");
-    myHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+export const createFolder = async (folderName: string): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
-    const raw = "# Hello\r\nThis is a test if I can upload that stuff easily";
+    const requestOptions = {
+        method: "MKCOL",
+        headers: requestHeaders,
+        redirect: "follow"
+    };
+
+    fetch(machineURL+folderName, requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
+}
+
+export const uploadFile = async (file: Blob, location:String ): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Content-Type", "text/plain");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+    const raw = file;
 
     const requestOptions = {
         method: "PUT",
-        headers: myHeaders,
+        headers: requestHeaders,
         body: raw,
         redirect: "follow"
     };
 
-    fetch("http://localhost:8080/remote.php/dav/files/testuser/UploadedReadme.md", requestOptions as RequestInit)
+    fetch(machineURL+location, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => console.log(result))
-        .catch((error) => console.error(error));
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
 }

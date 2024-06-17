@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Image } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
@@ -9,7 +9,7 @@ import FileCard from "../components/FileCard";
 import { FileCardType, FileListType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
-import { getFolderContent, searchLatestFiles } from "../utils/ServerRequests";
+import { getFolderContent, searchLatestFiles, deleteItem, createFolder} from "../utils/ServerRequests";
 
 
 enum FileView {
@@ -45,8 +45,18 @@ const FilesTabScreen = () => {
                 setLatestFiles(results);
             }
         };
+        const deleteFileTest = async () => {
+            const result = await deleteItem("/remote.php/dav/files/testuser/Documents/Readme.md");
+            console.log(result);
+        };
+        const createFolderTest = async () => {
+            const result = await createFolder("/remote.php/dav/files/testuser/Documents/TestFolder");
+            console.log(result);
+        };
         fetchFolderContent();
         fetchLatestFiles();
+        deleteFileTest();
+        createFolderTest();
     }, []);
 
 
