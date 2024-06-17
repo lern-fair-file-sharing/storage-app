@@ -1,16 +1,15 @@
 import { FolderCardType, FileCardType, FileListType } from "../types/FileTypes";
 import { PropfindResponseType, PropSearchResponseType } from "../types/ResponseTypes";
 import Constants from "expo-constants";
+var parseString = require("react-native-xml2js").parseString;
 
-const uri = Constants?.expoConfig?.hostUri
-  ? Constants.expoConfig.hostUri.split(`:`)?.shift()
-  : `yourapi.com`;
 
-var parseString = require('react-native-xml2js').parseString;
-const machineIP = uri;
-const machinePort = "8080";
-const machineURL = "http://" + machineIP + ":" + machinePort;
-const user = "testuser";
+const host = Constants?.expoConfig?.hostUri
+  ? Constants.expoConfig.hostUri.split(":")?.shift()
+  : "unkown";
+
+const machineURL = `http://${host}:${process.env.EXPO_PUBLIC_HOST_PORT}`
+const user = process.env.EXPO_PUBLIC_USER; 
 const userpath = "/files/" + user;
 
 
@@ -20,7 +19,7 @@ const userpath = "/files/" + user;
 export const getFolderContent = async (directory: string): Promise<FileListType | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Content-Type", "text/plain");
-    requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
     const raw = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n <d:propfind xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\" xmlns:nc=\"http://nextcloud.org/ns\">\r\n   <d:prop>\r\n     <d:getlastmodified/>\r\n     <d:getcontentlength/>\r\n     <d:getcontenttype/>\r\n     <oc:permissions/>\r\n     <d:resourcetype/>\r\n     <d:getetag/>\r\n     <oc:fileid />\r\n     <oc:permissions />\r\n     <oc:size />\r\n     <oc:tags />\r\n     <d:getcontentlength />\r\n     <nc:has-preview />\r\n     <oc:favorite />\r\n     <oc:comments-unread />\r\n     <oc:owner-display-name />\r\n     <oc:share-types />\r\n   </d:prop>\r\n </d:propfind>";
 
