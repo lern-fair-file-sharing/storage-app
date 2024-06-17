@@ -111,7 +111,7 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
 };  
 
 
-export const deleteItem = async (fileURL: string): Promise<boolean | void> => {
+export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
@@ -121,7 +121,7 @@ export const deleteItem = async (fileURL: string): Promise<boolean | void> => {
         redirect: "follow"
     };
 
-    fetch(machineURL+fileURL, requestOptions as RequestInit)
+    fetch(machineURL+itemURL, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {return true})
         .catch((error) => {console.error(error); return false});
