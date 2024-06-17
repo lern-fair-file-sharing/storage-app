@@ -1,9 +1,9 @@
 import { FolderCardType, FileCardType, FileListType } from "../types/FileTypes";
 import { PropfindResponseType, PropSearchResponseType } from "../types/ResponseTypes";
 import * as FileSystem from "expo-file-system";
-import { StorageAccessFramework } from "expo-file-system";
-import { Alert } from 'react-native';
+import { Alert, Platform } from "react-native";
 import Constants from "expo-constants";
+import * as Sharing from "expo-sharing";
 var parseString = require("react-native-xml2js").parseString;
 
 
@@ -14,6 +14,7 @@ const host = Constants?.expoConfig?.hostUri
 const machineURL = `http://${host}:${process.env.EXPO_PUBLIC_HOST_PORT}`
 const user = process.env.EXPO_PUBLIC_USER; 
 const userpath = "/files/" + user;
+
 
 
 // This function is used to get the list of files and folders from the server
@@ -78,8 +79,7 @@ export const getFolderContent = async (directory: string): Promise<FileListType 
 export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("content-Type", "text/xml");
-    requestHeaders.append("Authorization", "Basic dGVzdHVzZXI6MTIzNA==");
-    requestHeaders.append("Cookie", "nc_sameSiteCookielax=true; nc_sameSiteCookiestrict=true; oc_sessionPassphrase=CiAfDImx%2B6zTIOvuv%2BOLXvLAfgd4EHh9VojUTooSI43RBwjQ00JoR884lKxyQUPRoGf21SqCCWTftnnsy3HOYhTEmlUE0lAom8qdV2xY6w1JJVJaTW%2BqG20Fd7jDqrA3; ocetqxf0qy6c=ec7939819be7340d23717f5a5ec29421");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
     const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>" + userpath + "</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:not>\r\n                 <d:is-collection/>\r\n             </d:not>\r\n         </d:where>\r\n         <d:orderby>\r\n            <d:order>\r\n                <d:prop>\r\n                    <d:getlastmodified/>\r\n                </d:prop>\r\n                <d:descending/>\r\n             </d:order>\r\n         </d:orderby>\r\n         <d:limit>\r\n           <d:nresults>20</d:nresults>\r\n         </d:limit>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
 
@@ -123,7 +123,7 @@ export const fetchFile = async (fileURL: string): Promise<string | void> => {
         headers: requestHeaders,
         redirect: "follow"
     };
-
+    
     try {
         const response = await fetch(`${machineURL}${fileURL}`, requestOptions);
 
@@ -144,28 +144,122 @@ export const fetchFile = async (fileURL: string): Promise<string | void> => {
     }
 };
 
-export const downloadFile = async (fileURL: string): Promise<any | void> => {
-    try {
-        const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) {
-            Alert.alert("Download Failed", "You need to give storage permission to download the file.");
-            return;
+async function saveFile(base64Data: string, filename: string, mimetype: string) {
+    if (Platform.OS === "android") {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        
+        if (permissions.granted) {
+            const directoryUri = permissions.directoryUri;
+
+            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, filename, mimetype);
+
+            await FileSystem.writeAsStringAsync(fileUri, base64Data.split(',')[1], {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            console.log(`File saved to ${fileUri}`);
+            return fileUri;
+        } else {
+            await Sharing.shareAsync(base64Data, { mimeType: mimetype, dialogTitle: 'Share the file' });
         }
+    } else {
+        await Sharing.shareAsync(base64Data, { mimeType: mimetype, dialogTitle: 'Share the file' });
+    }
+}
+
+export const downloadFile = async (fileURL: string): Promise<void> => {
+    try {
+        
 
         const base64Data = await fetchFile(fileURL);
         if (!base64Data) {
             throw new Error("Failed to fetch file content");
         }
 
-        const filePath = `${FileSystem.documentDirectory}${fileURL.split("/").pop()}`
-        await FileSystem.writeAsStringAsync(filePath, base64Data.split(',')[1], {
-            encoding: FileSystem.EncodingType.Base64,
-        });
-        Alert.alert("File Downloaded", `File has been downloaded to ${filePath}`);
+        const fileName = fileURL.split("/").pop();
+        if (!fileName) {
+            throw new Error("Invalid file URL");
+        }
+
+        if (Platform.OS === "android") {
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            
+            if (permissions.granted) {
+                const directoryUri = permissions.directoryUri;
+                const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/octet-stream");
+    
+                await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+            }
+            else {
+                await Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+            }
+        } else {
+            const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+            await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            await Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+        }
+
+        Alert.alert("File Downloaded", `File has been downloaded.`);
     } catch (error) {
-        console.error(error);
+        console.error('Download File Error:', error);
         Alert.alert("Download Failed", "An error occurred while downloading the file.");
     }
+};
+
+export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+    const requestOptions = {
+        method: "DELETE",
+        headers: requestHeaders,
+        redirect: "follow"
+    };
+
+    fetch(machineURL+itemURL, requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
 }
 
+export const createFolder = async (folderURL: string): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
+    const requestOptions = {
+        method: "MKCOL",
+        headers: requestHeaders,
+        redirect: "follow"
+    };
+
+    fetch(machineURL+folderURL, requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
+}
+
+export const uploadFile = async (file: Blob, location:String ): Promise<boolean | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Content-Type", "text/plain");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+    const raw = file;
+
+    const requestOptions = {
+        method: "PUT",
+        headers: requestHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch(machineURL+location, requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => {return true})
+        .catch((error) => {console.error(error); return false});
+}

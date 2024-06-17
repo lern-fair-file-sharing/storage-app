@@ -7,7 +7,7 @@ import { FileCardType} from "../types/FileTypes";
 
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
-const noPreviewImage = require("../../assets/icon.png");
+const noPreviewImage = require("../../assets/basic-file-icon.png");
 
 
 const FileCard = (props: FileCardType) => {
@@ -40,12 +40,12 @@ const FileCard = (props: FileCardType) => {
     return (
         <View style={styles.container}>
             <Image
-                style={fileType !== "pdf" ? styles.filePreview : styles.pdfPreview}
+                style={fileType === "image" ? styles.filePreview : styles.pdfPreview}
                 source={previewImage}
                 resizeMode="contain"
             />
             <View style={styles.fileInfos}>
-                <Text style={styles.fileName}>{props.fileName}</Text>
+                <Text style={styles.fileName}>{props.fileName.replace("%", " ")}</Text>
                 <View style={styles.tagPlaceHolder} />
             </View>
             <TouchableOpacity onPress={() => {
