@@ -15,7 +15,7 @@ const noPreviewImage = require("../../assets/basic-file-icon.png");
 
 
 interface FileCardProps extends FileCardType {
-    cardRemovalHandler: (url: string) => void
+    cardRemovalHandler?: (url: string) => void
 }
 
 
@@ -59,7 +59,7 @@ const FileCard = (props: FileCardProps) => {
     const handleDeleteFile = async() => {
         const status = await deleteItem(props.fileURL);
         if (status) {
-            props.cardRemovalHandler(props.fileURL);
+            props.cardRemovalHandler?(props.fileURL) : undefined;
             ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
         }
         else {
