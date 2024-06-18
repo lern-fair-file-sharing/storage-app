@@ -1,10 +1,10 @@
-import { StyleSheet, View, Text, Image, Pressable, TouchableOpacity, ToastAndroid } from "react-native";
-import Popover, { PopoverPlacement } from "react-native-popover-view";
-import { Alert, Platform } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid } from "react-native";
+import Popover from "react-native-popover-view";
+import { Alert } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { AntDesign } from "@expo/vector-icons";
-import React, { Key, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
 import { fetchFile, downloadFile, deleteItem } from "../utils/ServerRequests";
 import { FileCardType} from "../types/FileTypes";

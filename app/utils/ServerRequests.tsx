@@ -144,28 +144,6 @@ export const fetchFile = async (fileURL: string): Promise<string | void> => {
     }
 };
 
-async function saveFile(base64Data: string, filename: string, mimetype: string) {
-    if (Platform.OS === "android") {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        
-        if (permissions.granted) {
-            const directoryUri = permissions.directoryUri;
-
-            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, filename, mimetype);
-
-            await FileSystem.writeAsStringAsync(fileUri, base64Data.split(',')[1], {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-
-            console.log(`File saved to ${fileUri}`);
-            return fileUri;
-        } else {
-            await Sharing.shareAsync(base64Data, { mimeType: mimetype, dialogTitle: 'Share the file' });
-        }
-    } else {
-        await Sharing.shareAsync(base64Data, { mimeType: mimetype, dialogTitle: 'Share the file' });
-    }
-}
 
 export const downloadFile = async (fileURL: string): Promise<boolean | void> => {
     try {
@@ -202,7 +180,6 @@ export const downloadFile = async (fileURL: string): Promise<boolean | void> => 
 
             await Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
         }
-
         return true;
     } catch (error) {
         console.error('Download File Error:', error);
@@ -222,8 +199,11 @@ export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
 
     return fetch(machineURL+itemURL, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => {
+            console.error(error);
+            return false
+        });
 }
 
 export const createFolder = async (folderURL: string): Promise<boolean | void> => {
@@ -258,6 +238,8 @@ export const uploadFile = async (file: Blob, location:String ): Promise<boolean 
 
     fetch(machineURL+location, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => {
+            console.error(error); return false
+        });
 }
