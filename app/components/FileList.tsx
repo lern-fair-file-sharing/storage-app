@@ -1,5 +1,5 @@
 import { useNavigation } from "expo-router";
-import { Key } from "react";
+import { Key, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { FileCardType, FolderCardType, FileListType } from "../types/FileTypes";
 import FileCard from "./FileCard";
@@ -7,27 +7,41 @@ import FolderCard from "./FolderCard";
 
 
 
+
 const FileList = (props: FileListType) => {
     const navigation = useNavigation();
 
+    const [files, setFiles] = useState<FileCardType[]>([]);
+    const [folders, setFolders] = useState<FolderCardType[]>([]);
+
+    useEffect(() => {
+        setFiles(props.files);
+        setFolders(props.folders);
+    }, [props.files, props.folders]);
+
+    const cardRemovalHandler = (url: string) => {
+        setFiles(prevFiles => prevFiles.filter(file => file.fileURL !== url));
+    }
+
     return (
         <View style={styles.container}>
-            {props.folders.map((folderData: FolderCardType, idx: Key | null | undefined) => (
+            {folders.map((folderData: FolderCardType) => (
                 <FolderCard
-                    key={idx}
+                    key={folderData.folderURL}
                     folderName={folderData.folderName}
                     folderURL={folderData.folderURL}
                     navigation={navigation}
                 />
             ))}
-            {props.files.map((fileData: FileCardType, idx: Key | null | undefined) => (
+            {files.map((fileData: FileCardType) => (
                 <FileCard
-                    key={idx}
+                    key={fileData.fileURL}
                     fileName={fileData.fileName}
                     fileType={fileData.fileType}
                     fileURL={fileData.fileURL}
                     lastModified={fileData.lastModified}
                     tags={fileData.tags}
+                    cardRemovalHandler={cardRemovalHandler}
                 />
             ))}
         </View>

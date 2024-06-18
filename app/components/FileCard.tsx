@@ -1,8 +1,12 @@
-import { StyleSheet, View, Text, Image, Pressable, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, Image, Pressable, TouchableOpacity, ToastAndroid } from "react-native";
+import Popover, { PopoverPlacement } from "react-native-popover-view";
+import { Alert, Platform } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import Feather from "@expo/vector-icons/Feather";
+import { AntDesign } from "@expo/vector-icons";
+import React, { Key, useEffect, useState } from "react";
 import Colors from "../utils/Colors";
-import { fetchFile, downloadFile } from "../utils/ServerRequests";
+import { fetchFile, downloadFile, deleteItem } from "../utils/ServerRequests";
 import { FileCardType} from "../types/FileTypes";
 
 
@@ -10,7 +14,12 @@ const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/basic-file-icon.png");
 
 
-const FileCard = (props: FileCardType) => {
+interface FileCardProps extends FileCardType {
+    cardRemovalHandler: (url: string) => void
+}
+
+
+const FileCard = (props: FileCardProps) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
     const [fileType, setFileType] = useState<string>("unknown");
 
@@ -37,6 +46,27 @@ const FileCard = (props: FileCardType) => {
         }
     }, [props.fileType, props.fileURL]);
 
+    const handleDownloadFile = async() => {
+        const status = await downloadFile(props.fileURL);
+        if (status) {
+            ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
+        }
+        else {
+            Alert.alert("Download Failed", "An error occurred while downloading the file.");
+        }
+    }
+
+    const handleDeleteFile = async() => {
+        const status = await deleteItem(props.fileURL);
+        if (status) {
+            props.cardRemovalHandler(props.fileURL);
+            ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
+        }
+        else {
+            Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Image
@@ -48,11 +78,26 @@ const FileCard = (props: FileCardType) => {
                 <Text style={styles.fileName}>{props.fileName.replace("%", " ")}</Text>
                 <View style={styles.tagPlaceHolder} />
             </View>
-            <TouchableOpacity onPress={() => {
-                downloadFile(props.fileURL)
-            }}>
-                <Entypo name="dots-three-vertical" size={24} color={Colors.primary} />
-            </TouchableOpacity>
+
+            <Popover
+                from={(
+                    <TouchableOpacity>
+                        <Entypo name="dots-three-vertical" size={20} color={Colors.primary} />
+                    </TouchableOpacity>
+                )}>
+                <View style={styles.settingModal}>
+                    <TouchableOpacity style={styles.settingButton} onPress={() => handleDownloadFile()}>
+                        <Feather name="download" size={25} color={Colors.primary} />
+                        <Text style={styles.settingText}>DOWNLOAD</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.settingButton} onPress={() => handleDeleteFile()}>
+                        <AntDesign name="delete" size={25} color={Colors.primary} />
+                        <Text style={styles.settingText}>DELETE</Text>
+                    </TouchableOpacity>
+                </View>
+            </Popover>
+
+            
         </View>
     );
 };
@@ -64,7 +109,7 @@ const styles = StyleSheet.create({
         minHeight: 60,
         width: "100%",
         borderRadius: 3,
-        borderWidth: 1,
+        borderWidth: 0,
         borderColor: Colors.surfaceOutline,
         display: "flex",
         flexDirection: "row",
@@ -96,6 +141,29 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: Colors.primary,
     },
+    settingModal: {
+        width: 250,
+        height: 150,
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        padding: 10
+    },
+    settingButton: {
+        flex: 1,
+        borderRadius: 3,
+        backgroundColor: Colors.surface,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 20
+    },
+    settingText: {
+        fontWeight: "bold",
+        color: Colors.primary,
+        fontSize: 17
+    }
 });
 
 export default FileCard;

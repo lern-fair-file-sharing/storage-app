@@ -167,10 +167,8 @@ async function saveFile(base64Data: string, filename: string, mimetype: string) 
     }
 }
 
-export const downloadFile = async (fileURL: string): Promise<void> => {
+export const downloadFile = async (fileURL: string): Promise<boolean | void> => {
     try {
-        
-
         const base64Data = await fetchFile(fileURL);
         if (!base64Data) {
             throw new Error("Failed to fetch file content");
@@ -205,10 +203,10 @@ export const downloadFile = async (fileURL: string): Promise<void> => {
             await Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
         }
 
-        Alert.alert("File Downloaded", `File has been downloaded.`);
+        return true;
     } catch (error) {
         console.error('Download File Error:', error);
-        Alert.alert("Download Failed", "An error occurred while downloading the file.");
+        return false;
     }
 };
 
@@ -222,7 +220,7 @@ export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
         redirect: "follow"
     };
 
-    fetch(machineURL+itemURL, requestOptions as RequestInit)
+    return fetch(machineURL+itemURL, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {return true})
         .catch((error) => {console.error(error); return false});
