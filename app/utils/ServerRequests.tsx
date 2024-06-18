@@ -1,6 +1,9 @@
 import { FolderCardType, FileCardType, FileListType } from "../types/FileTypes";
 import { PropfindResponseType, PropSearchResponseType } from "../types/ResponseTypes";
+import * as FileSystem from "expo-file-system";
+import { Alert, Platform } from "react-native";
 import Constants from "expo-constants";
+import * as Sharing from "expo-sharing";
 var parseString = require("react-native-xml2js").parseString;
 
 
@@ -108,8 +111,81 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
             return fileList;
         })
         .catch((error) => console.error(error));
-};  
+};
 
+
+export const fetchFile = async (fileURL: string): Promise<string | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: requestHeaders,
+        redirect: "follow"
+    };
+    
+    try {
+        const response = await fetch(`${machineURL}${fileURL}`, requestOptions);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error - status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+
+export const downloadFile = async (fileURL: string): Promise<boolean | void> => {
+    try {
+        const base64Data = await fetchFile(fileURL);
+        if (!base64Data) {
+            throw new Error("Failed to fetch file content");
+        }
+
+        const fileName = fileURL.split("/").pop();
+        if (!fileName) {
+            throw new Error("Invalid file URL");
+        }
+
+        if (Platform.OS === "android") {
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            
+            if (permissions.granted) {
+                const directoryUri = permissions.directoryUri;
+                const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/octet-stream");
+    
+                await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+            }
+            else {
+                await Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+            }
+        } else {
+            const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+            await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            await Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+        }
+        return true;
+    } catch (error) {
+        console.error('Download File Error:', error);
+        return false;
+    }
+};
 
 export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
     const requestHeaders = new Headers();
@@ -121,10 +197,13 @@ export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
         redirect: "follow"
     };
 
-    fetch(machineURL+itemURL, requestOptions as RequestInit)
+    return fetch(machineURL+itemURL, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => {
+            console.error(error);
+            return false
+        });
 }
 
 export const createFolder = async (folderURL: string): Promise<boolean | void> => {
@@ -159,6 +238,8 @@ export const uploadFile = async (file: Blob, location:String ): Promise<boolean 
 
     fetch(machineURL+location, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => {
+            console.error(error); return false
+        });
 }

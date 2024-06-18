@@ -2,22 +2,19 @@ import { StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Colors from "../utils/Colors";
 import { FolderCardType } from "../types/FileTypes";
-import { getFolderContent, searchLatestFiles } from "../utils/ServerRequests";
 
 
 const pdfPreviewImage = require("../../assets/folder-icon.png");
 
-interface FolderNavigationType extends FolderCardType {
+interface FolderCardProps extends FolderCardType {
     navigation?: any
 }
 
 
-const FolderCard = (props: FolderNavigationType) => {
+const FolderCard = (props: FolderCardProps) => {
     const handleFolderPress = async() => {
         props.navigation.push("FolderContentScreen", { folderURL: props.folderURL, folderName: props.folderName });
-    };
-
-    
+    }
 
     return (
         <TouchableOpacity
