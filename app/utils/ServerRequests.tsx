@@ -113,6 +113,25 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
         .catch((error) => console.error(error));
 };
 
+export const searchRoot = async (searchQuery: string): Promise<FileListType[] | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("content-Type", "text/xml");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+
+const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>/files/testuser</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:like>\r\n                <d:prop>\r\n                    <d:displayname/>\r\n                </d:prop>\r\n                <d:literal>"+searchQuery+"%</d:literal>\r\n            </d:like>\r\n         </d:where>\r\n         <d:orderby/>\r\n    </d:basicsearch>\r\n</d:searchrequest>";
+    const requestOptions = {
+        method: "SEARCH",
+        headers: requestHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch("http://localhost:8080/remote.php/dav", requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.error(error));
+}
+
 
 export const fetchFile = async (fileURL: string): Promise<string | void> => {
     const requestHeaders = new Headers();
@@ -123,7 +142,7 @@ export const fetchFile = async (fileURL: string): Promise<string | void> => {
         headers: requestHeaders,
         redirect: "follow"
     };
-    
+
     try {
         const response = await fetch(`${machineURL}${fileURL}`, requestOptions);
 
@@ -159,11 +178,11 @@ export const downloadFile = async (fileURL: string): Promise<boolean | void> => 
 
         if (Platform.OS === "android") {
             const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-            
+
             if (permissions.granted) {
                 const directoryUri = permissions.directoryUri;
                 const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/octet-stream");
-    
+
                 await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
                     encoding: FileSystem.EncodingType.Base64,
                 });
@@ -197,7 +216,7 @@ export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
         redirect: "follow"
     };
 
-    return fetch(machineURL+itemURL, requestOptions as RequestInit)
+    return fetch(machineURL + itemURL, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => { return true })
         .catch((error) => {
@@ -216,13 +235,13 @@ export const createFolder = async (folderURL: string): Promise<boolean | void> =
         redirect: "follow"
     };
 
-    fetch(machineURL+folderURL, requestOptions as RequestInit)
+    fetch(machineURL + folderURL, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => { console.error(error); return false });
 }
 
-export const uploadFile = async (file: Blob, location:String ): Promise<boolean | void> => {
+export const uploadFile = async (file: Blob, location: String): Promise<boolean | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Content-Type", "text/plain");
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
@@ -236,7 +255,7 @@ export const uploadFile = async (file: Blob, location:String ): Promise<boolean 
         redirect: "follow"
     };
 
-    fetch(machineURL+location, requestOptions as RequestInit)
+    fetch(machineURL + location, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => { return true })
         .catch((error) => {
