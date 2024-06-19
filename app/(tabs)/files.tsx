@@ -10,6 +10,7 @@ import { FileCardType, FileListType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
 import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
+import { getTimeFrame, LastModified } from "../utils/utils";
 
 
 enum FileView {
@@ -65,6 +66,49 @@ const FilesTabScreen = () => {
         </View>
     );
 
+    const fileTimeCategorization = () => {
+        // Split files into groups based on their last-modified time
+        const categorizedFiles = latestFiles.reduce((accumulator: any, file: FileCardType) => {
+            const timeFrame = getTimeFrame(file.lastModified);
+            
+            switch (timeFrame) {
+                case LastModified.LAST_THREE_HOURS:
+                    accumulator.lastThreeHours.push(file);
+                    break;
+                case LastModified.TODAY:
+                    accumulator.today.push(file);
+                    break;
+                case LastModified.THIS_WEEK:
+                    accumulator.thisWeek.push(file);
+                    break;
+                default:
+                    break;
+            }
+        
+            return accumulator;
+        }, {
+            lastThreeHours: [],
+            today: [],
+            thisWeek: []
+        });
+        
+        const lastThreeHoursFiles = categorizedFiles.lastThreeHours;
+        const todayFiles = categorizedFiles.today;
+        const thisWeekFiles = categorizedFiles.thisWeek;
+
+        if (lastThreeHoursFiles.length === 0 && todayFiles.length === 0 && thisWeekFiles.length === 0) {
+            return <Text style={styles.fileActivityTime}>No recent activity!</Text>
+        }
+
+        return (
+            <ScrollView style={styles.timeBasedFileActivities}>
+                {lastThreeHoursFiles.length > 0 ? renderFileListSection("Letzte 3 Stunden", lastThreeHoursFiles) : null}
+                {todayFiles.length > 0 ? renderFileListSection("Heute", todayFiles) : null}
+                {thisWeekFiles.length > 0 ? renderFileListSection("Diese Woche", thisWeekFiles) : null}
+            </ScrollView>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.content}>
@@ -96,17 +140,14 @@ const FilesTabScreen = () => {
                     }}
                 />
 
-                {fileView === FileView.Activity ? (
-                    <ScrollView style={styles.timeBasedFileActivities}>
-                        {renderFileListSection("Letzte 3 Stunden", latestFiles.slice(0, 3))}
-                        {renderFileListSection("Heute", latestFiles.slice(3, 6))}
-                        {renderFileListSection("Diese Woche", latestFiles.slice(6, 9))}
-                    </ScrollView>
-                ) : (
-                    <ScrollView style={styles.courseFolderSection}>
-                        <FileList folders={allFolders} files={allFiles}/>
-                    </ScrollView>
-                )}
+                {
+                    fileView === FileView.Activity ? fileTimeCategorization()
+                    : ( 
+                        <ScrollView style={styles.courseFolderSection}>
+                            <FileList folders={allFolders} files={allFiles}/>
+                        </ScrollView>
+                    )
+                }
             </View>
         </View>
     );
