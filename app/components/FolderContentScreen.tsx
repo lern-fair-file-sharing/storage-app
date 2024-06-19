@@ -1,8 +1,8 @@
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, RefreshControl } from "react-native";
 import FileList from "./FileList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect, useCallback } from "react";
 import { getFolderContent } from "../utils/ServerRequests";
 import { FileListType, FolderCardType, FileCardType } from "../types/FileTypes";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,31 +18,40 @@ export type RootStackParamList = {
 
 const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "FolderContentScreen">) => {
     const navigation = useNavigation();
-    const insets = useSafeAreaInsets();
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         navigation.setOptions({
             title: props.route.params?.folderName,
         });
     }, [navigation]);
 
-    const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
-    const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
+    const onRefresh = useCallback(() => {
+        fetchFolderContent();
+    }, []);
+
+    const fetchFolderContent = async () => {
+        const content = await getFolderContent(props.route.params?.folderURL);
+        if (content) {
+            setAllFiles(content.files);
+            setAllFolders(content.folders);
+        }
+    };
+
+    const [allFolders, setAllFolders] = useState<FolderCardType[]>([] as FolderCardType[]);
+    const [allFiles, setAllFiles] = useState<FileCardType[]>([] as FileCardType[]);
 
     useEffect(() => {
-        const fetchFolderContent = async () => {
-            const content = await getFolderContent(props.route.params?.folderURL);
-            if (content) {
-                setAllFiles(content.files);
-                setAllFolders(content.folders);
-            }
-        };
         fetchFolderContent();
     }, []);
     
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView
+            style={styles.container}
+            refreshControl={
+                <RefreshControl refreshing={false} onRefresh={onRefresh} />
+        }
+            >
             <FileList folders={allFolders} files={allFiles}/>
         </ScrollView>     
     );

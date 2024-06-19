@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { StyleSheet, View, Text, ScrollView, Image } from "react-native";
+import { StyleSheet, View, Text, ScrollView, RefreshControl } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
 import FileCard from "../components/FileCard";
-import { FileCardType, FileListType, FolderCardType } from "../types/FileTypes";
+import { FileCardType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
 import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
@@ -19,37 +19,37 @@ enum FileView {
 }
 
 
-interface TimeGroupedFiles {
-    [lastModified: string]: FileCardType[];
-}
-
 
 const FilesTabScreen = () => {
     const [fileView, setFileView] = useState<FileView>(FileView.Activity);
-    const [timeGroupedFiles, setTimeGroupedFiles] = useState<TimeGroupedFiles>();
     const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
     const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
     const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
 
-
-    useEffect(() => {
-        const fetchFolderContent = async () => {
-            const content = await getFolderContent("/remote.php/dav/files/testuser/");
-            if (content) {
-                setAllFiles(content.files);
-                setAllFolders(content.folders);
-            }
-        };
-        const fetchLatestFiles = async () => {
-            const results = await searchLatestFiles();
-            if (results) {
-                setLatestFiles(results);
-            }
-        };
+    const onRefresh = useCallback(() => {
         fetchFolderContent();
         fetchLatestFiles();
     }, []);
 
+    const fetchFolderContent = async () => {
+        const content = await getFolderContent("/remote.php/dav/files/testuser/");
+        if (content) {
+            setAllFiles(content.files);
+            setAllFolders(content.folders);
+        }
+    };
+    
+    const fetchLatestFiles = async () => {
+        const results = await searchLatestFiles();
+        if (results) {
+            setLatestFiles(results);
+        }
+    };
+
+    useEffect(() => {
+        fetchFolderContent();
+        fetchLatestFiles();
+    }, []);
 
     const toggleFileView = () => {
         setFileView(fileView === FileView.Courses ? FileView.Activity : FileView.Courses);
@@ -58,11 +58,7 @@ const FilesTabScreen = () => {
     const renderFileListSection = (title: string, files: FileCardType[]) => (
         <View style={styles.fileActivitySection}>
             <Text style={styles.fileActivityTime}>{title}:</Text>
-            {
-                files.map((file: FileCardType, idx: number) => {
-                    return <FileCard key={idx} {...file} />
-                })
-            }
+            <FileList folders={[]} files={files} />
         </View>
     );
 
@@ -101,7 +97,12 @@ const FilesTabScreen = () => {
         }
 
         return (
-            <ScrollView style={styles.timeBasedFileActivities}>
+            <ScrollView
+                style={styles.timeBasedFileActivities}
+                refreshControl={
+                    <RefreshControl refreshing={false} onRefresh={onRefresh} />
+                }
+            >
                 {lastThreeHoursFiles.length > 0 ? renderFileListSection("Letzte 3 Stunden", lastThreeHoursFiles) : null}
                 {todayFiles.length > 0 ? renderFileListSection("Heute", todayFiles) : null}
                 {thisWeekFiles.length > 0 ? renderFileListSection("Diese Woche", thisWeekFiles) : null}
@@ -143,7 +144,12 @@ const FilesTabScreen = () => {
                 {
                     fileView === FileView.Activity ? fileTimeCategorization()
                     : ( 
-                        <ScrollView style={styles.courseFolderSection}>
+                        <ScrollView
+                            style={styles.courseFolderSection}
+                            refreshControl={
+                                <RefreshControl refreshing={false} onRefresh={onRefresh} />
+                            }
+                        >
                             <FileList folders={allFolders} files={allFiles}/>
                         </ScrollView>
                     )
