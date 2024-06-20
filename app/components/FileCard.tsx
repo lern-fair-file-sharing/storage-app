@@ -75,7 +75,7 @@ const FileCard = (props: FileCardProps) => {
                 resizeMode="contain"
             />
             <View style={styles.fileInfos}>
-                <Text style={styles.fileName}>{props.fileName.replace("%", " ")}</Text>
+                <Text style={styles.fileName}>{decodeURIComponent(props.fileName)}</Text>
                 <View style={styles.tagPlaceHolder} />
             </View>
 

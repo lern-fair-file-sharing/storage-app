@@ -26,15 +26,15 @@ interface TimeGroupedFiles {
 
 const FilesTabScreen = () => {
     const [fileView, setFileView] = useState<FileView>(FileView.Activity);
-    const [timeGroupedFiles, setTimeGroupedFiles] = useState<TimeGroupedFiles>();
     const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
     const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
     const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
 
+    const FILE_URL = `/remote.php/dav/files/${process.env.EXPO_PUBLIC_USER}/`;
 
     useEffect(() => {
         const fetchFolderContent = async () => {
-            const content = await getFolderContent("/remote.php/dav/files/testuser/");
+            const content = await getFolderContent(FILE_URL);
             if (content) {
                 setAllFiles(content.files);
                 setAllFolders(content.folders);

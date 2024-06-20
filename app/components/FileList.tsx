@@ -14,9 +14,25 @@ const FileList = (props: FileListType) => {
     const [files, setFiles] = useState<FileCardType[]>([]);
     const [folders, setFolders] = useState<FolderCardType[]>([]);
 
+    const PERSONAL_SPACE_FOLDER_NAME = "Pesönliche Ablage";
+
+    // Moves the "personal space" folder to the very top if it exists
+    const personalFolderToTop = (folders: FolderCardType[]) => {
+        const index = folders.findIndex(folder => decodeURIComponent(folder.folderName) === PERSONAL_SPACE_FOLDER_NAME);
+
+        if (index !== -1) {
+            const [personalSpaceFolder] = folders.splice(index, 1);
+            folders.unshift(personalSpaceFolder);
+        }
+
+        return folders;
+    }
+
     useEffect(() => {
         setFiles(props.files);
-        setFolders(props.folders);
+        const rearangedFolders = personalFolderToTop(props.folders);
+        setFolders(rearangedFolders);
+        
     }, [props.files, props.folders]);
 
     const cardRemovalHandler = (url: string) => {

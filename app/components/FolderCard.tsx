@@ -22,7 +22,7 @@ const FolderCard = (props: FolderCardProps) => {
             onPress={() => { handleFolderPress() }}
         >
             <Image style={styles.folderIcon} source={pdfPreviewImage} resizeMode="contain" />
-            <Text style={styles.folderName}>{props.folderName}</Text>
+            <Text style={styles.folderName}>{decodeURIComponent(props.folderName)}</Text>
         </TouchableOpacity>
     );
 };
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     },
     folderIcon: {
         flex: 1,
-        height: "50%",
+        height: "40%",
         borderRadius: 3,
     },
     folderName: {
