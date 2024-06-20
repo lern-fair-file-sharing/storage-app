@@ -114,7 +114,8 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
 };
 
 
-export const fetchFile = async (fileURL: string): Promise<string | void> => {
+
+export const fetchFile = (fileURL: string): Promise<string | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
@@ -123,71 +124,83 @@ export const fetchFile = async (fileURL: string): Promise<string | void> => {
         headers: requestHeaders,
         redirect: "follow"
     };
-    
-    try {
-        const response = await fetch(`${machineURL}${fileURL}`, requestOptions);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error - status: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-
-        return new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
+    return fetch(`${machineURL}${fileURL}`, requestOptions)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error - status: ${response.status}`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            return new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        })
+        .catch(error => {
+            console.error(error);
         });
-    } catch (error) {
-        console.error(error);
-    }
 };
 
 
-export const downloadFile = async (fileURL: string): Promise<boolean | void> => {
-    try {
-        const base64Data = await fetchFile(fileURL);
-        if (!base64Data) {
-            throw new Error("Failed to fetch file content");
-        }
+export const downloadFile = (fileURL: string): Promise<boolean | void> => {
+    return fetchFile(fileURL)
+        .then(base64Data => {
+            if (!base64Data) {
+                throw new Error("Failed to fetch file content");
+            }
 
-        const fileName = fileURL.split("/").pop();
-        if (!fileName) {
-            throw new Error("Invalid file URL");
-        }
+            const fileName = fileURL.split("/").pop();
+            if (!fileName) {
+                throw new Error("Invalid file URL");
+            }
 
-        if (Platform.OS === "android") {
-            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-            
-            if (permissions.granted) {
-                const directoryUri = permissions.directoryUri;
-                const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/octet-stream");
-    
-                await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+            if (Platform.OS === "android") {
+                return FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+                    .then(permissions => {
+                        if (permissions.granted) {
+                            const directoryUri = permissions.directoryUri;
+                            return FileSystem.StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/octet-stream")
+                                .then(fileUri => {
+                                    return FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
+                                        encoding: FileSystem.EncodingType.Base64,
+                                    });
+                                })
+                                .catch(error => {
+                                    return false;
+                                });
+                        } else {
+                            return Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+                        }
+                    })
+                    .catch(error => {
+                        return false;
+                    });
+            } else {
+                const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+                return FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
                     encoding: FileSystem.EncodingType.Base64,
+                })
+                .then(() => {
+                    return Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+                })
+                .catch(error => {
+                    return false;
                 });
             }
-            else {
-                await Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
-            }
-        } else {
-            const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
-
-            await FileSystem.writeAsStringAsync(fileUri, base64Data.split(",")[1], {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-
-            await Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
-        }
-        return true;
-    } catch (error) {
-        console.error('Download File Error:', error);
-        return false;
-    }
+        })
+        .then((result) => result)
+        .catch(error => {
+            console.error('Download File Error:', error);
+            return false;
+        });
 };
 
-export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
+
+export const deleteItem = async (itemURL: string): Promise<void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
@@ -198,11 +211,9 @@ export const deleteItem = async (itemURL: string): Promise<boolean | void> => {
     };
 
     return fetch(machineURL+itemURL, requestOptions as RequestInit)
-        .then((response) => response.text())
-        .then((result) => { return true })
+        .then((response) => {})
         .catch((error) => {
-            console.error(error);
-            return false
+            throw error;
         });
 }
 

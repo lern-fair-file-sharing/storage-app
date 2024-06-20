@@ -29,14 +29,7 @@ const FileCard = (props: FileCardProps) => {
             setFileType("pdf");
         }
         else if (props.fileType.split("/")[0] === "image") {
-            const fetchImage = async () => {
-                try {
-                    const base64Image = await fetchFile(props.fileURL);
-                    setPreviewImage({ uri: base64Image });
-                } catch (error) {
-                    console.error(error);
-                }
-            };
+            
             fetchImage();
             setFileType("image");
         }
@@ -45,34 +38,51 @@ const FileCard = (props: FileCardProps) => {
         }
     }, [props.fileType, props.fileURL]);
 
-    const handleDownloadFile = async() => {
-        const status = await downloadFile(props.fileURL);
-        if (status) {
-            if (Platform.OS === "android") {
-                ToastAndroid.show("File downloaded!", ToastAndroid.SHORT)
-            } else {
-                Alert.alert("File downloaded!");
-            }
-        }
-        else {
-            Alert.alert("Download Failed", "An error occurred while downloading the file.");
-        }
-    }
+    const fetchImage = () => {
+        fetchFile(props.fileURL)
+            .then(base64Image => {
+                setPreviewImage({ uri: base64Image });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
+    
+    const handleDownloadFile = () => {
+        downloadFile(props.fileURL)
+            .then(status => {
+                if (status) {
+                    if (Platform.OS === "android") {
+                        ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
+                    } else {
+                        Alert.alert("File downloaded!");
+                    }
+                } else {
+                    Alert.alert("Download Failed", "An error occurred while downloading the file.");
+                }
+            })
+            .catch(error => {
+                console.error('Download File Error:', error);
+                Alert.alert("Download Failed", "An unexpected error occurred while downloading the file.");
+            });
+    };
 
-    const handleDeleteFile = async() => {
-        const status = await deleteItem(props.fileURL);
-        if (status) {
-            props.cardRemovalHandler(props.fileURL);
-            if (Platform.OS === "android") {
-                ToastAndroid.show("File deleted!", ToastAndroid.SHORT)
-            } else {
-                Alert.alert("File deleted!");
-            }
-        }
-        else {
-            Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
-        }
-    }
+    
+    const handleDeleteFile = () => {
+        deleteItem(props.fileURL)
+            .then(result => {
+                props.cardRemovalHandler(props.fileURL);
+                if (Platform.OS === "android") {
+                    ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
+                } else {
+                    Alert.alert("File deleted!");
+                }
+            })
+            .catch(error => {
+                Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
+            });
+    };
+    
 
     return (
         <View style={styles.container}>
