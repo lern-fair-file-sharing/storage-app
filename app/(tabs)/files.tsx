@@ -26,11 +26,6 @@ const FilesTabScreen = () => {
     const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
     const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
 
-    const onRefresh = useCallback(() => {
-        fetchFolderContent();
-        fetchLatestFiles();
-    }, []);
-
     const fetchFolderContent = async () => {
         const content = await getFolderContent("/remote.php/dav/files/testuser/");
         if (content) {
@@ -46,12 +41,21 @@ const FilesTabScreen = () => {
         }
     };
 
-    useEffect(() => {
+    const fetchAllData = () => {
         fetchFolderContent();
         fetchLatestFiles();
+    }
+
+    const onRefresh = useCallback(() => { fetchAllData() }, []);
+
+
+    useEffect(() => {
+        fetchAllData();
     }, []);
 
     const toggleFileView = () => {
+        fetchLatestFiles();
+        fetchFolderContent();
         setFileView(fileView === FileView.Courses ? FileView.Activity : FileView.Courses);
     };
 

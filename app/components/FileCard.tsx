@@ -1,6 +1,5 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Pressable } from "react-native";
 import Popover from "react-native-popover-view";
-import { Alert } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { AntDesign } from "@expo/vector-icons";
@@ -49,7 +48,11 @@ const FileCard = (props: FileCardProps) => {
     const handleDownloadFile = async() => {
         const status = await downloadFile(props.fileURL);
         if (status) {
-            ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
+            if (Platform.OS === "android") {
+                ToastAndroid.show("File downloaded!", ToastAndroid.SHORT)
+            } else {
+                Alert.alert("File downloaded!");
+            }
         }
         else {
             Alert.alert("Download Failed", "An error occurred while downloading the file.");
@@ -60,7 +63,11 @@ const FileCard = (props: FileCardProps) => {
         const status = await deleteItem(props.fileURL);
         if (status) {
             props.cardRemovalHandler(props.fileURL);
-            ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
+            if (Platform.OS === "android") {
+                ToastAndroid.show("File deleted!", ToastAndroid.SHORT)
+            } else {
+                Alert.alert("File deleted!");
+            }
         }
         else {
             Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
@@ -80,8 +87,11 @@ const FileCard = (props: FileCardProps) => {
             </View>
 
             <Popover
+                animationConfig={{
+                    duration: 300
+                }}
                 from={(
-                    <TouchableOpacity>
+                    <TouchableOpacity style={styles.openSettingsButton}>
                         <Entypo name="dots-three-vertical" size={20} color={Colors.primary} />
                     </TouchableOpacity>
                 )}>
@@ -134,12 +144,17 @@ const styles = StyleSheet.create({
     },
     tagPlaceHolder: {
         flex: 1,
-        backgroundColor: "#cfcfcf",
+        backgroundColor: "#dfdfdf",
         height: 20,
     },
     fileName: {
+        flex: 1,
         fontSize: 15,
         color: Colors.primary,
+    },
+    openSettingsButton: {
+        flex: 1,
+        alignItems: "center",
     },
     settingModal: {
         width: 250,
