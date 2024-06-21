@@ -51,14 +51,10 @@ const FileCard = (props: FileCardProps) => {
     const handleDownloadFile = () => {
         downloadFile(props.fileURL)
             .then(status => {
-                if (status) {
-                    if (Platform.OS === "android") {
-                        ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
-                    } else {
-                        Alert.alert("File downloaded!");
-                    }
+                if (Platform.OS === "android") {
+                    ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
                 } else {
-                    Alert.alert("Download Failed", "An error occurred while downloading the file.");
+                    Alert.alert("File downloaded!");
                 }
             })
             .catch(error => {

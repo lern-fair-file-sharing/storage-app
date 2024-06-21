@@ -170,14 +170,14 @@ export const downloadFile = (fileURL: string): Promise<boolean | void> => {
                                     });
                                 })
                                 .catch(error => {
-                                    return false;
+                                    return error;
                                 });
                         } else {
                             return Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
                         }
                     })
                     .catch(error => {
-                        return false;
+                        return error;
                     });
             } else {
                 const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
@@ -188,14 +188,14 @@ export const downloadFile = (fileURL: string): Promise<boolean | void> => {
                     return Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
                 })
                 .catch(error => {
-                    return false;
+                    return error;
                 });
             }
         })
-        .then((result) => true)
+        .then((result) => result)
         .catch(error => {
             console.error('Download File Error:', error);
-            return false;
+            return error;
         });
 };
 
