@@ -4,7 +4,6 @@ import * as FileSystem from "expo-file-system";
 import { Alert, Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Sharing from "expo-sharing";
-import axios from "axios";
 var parseString = require("react-native-xml2js").parseString;
 
 
@@ -119,6 +118,7 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
 export const fetchFile = (fileURL: string): Promise<string | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+    //requestHeaders.append("If-none-match", "browtf");
 
     const requestOptions: RequestInit = {
         method: "GET",
@@ -200,18 +200,29 @@ export const downloadFile = (fileURL: string): Promise<void> => {
 };
 
 export const deleteItem = async (itemURL: string): Promise<void> => {
-    const requestConfig = {
-        headers: {
-            Authorization: `Basic ${process.env.EXPO_PUBLIC_TOKEN}`,
-        }
+    const requestHeaders = new Headers();
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
+    requestHeaders.append("If-none-match", "areyoukiddingmeapple");
+
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: requestHeaders,
+        redirect: "follow"
     };
 
     try {
-        const response = await axios.delete(machineURL + itemURL, requestConfig);
+        const response = await fetch(machineURL + itemURL, requestOptions);
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            console.debug(errorMessage);
+            throw new Error(errorMessage);
+        }
     } catch (error) {
         throw error;
     }
 };
+
 
 export const createFolder = async (folderURL: string): Promise<boolean | void> => {
     const requestHeaders = new Headers();
