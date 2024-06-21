@@ -14,7 +14,7 @@ const noPreviewImage = require("../../assets/basic-file-icon.png");
 
 
 interface FileCardProps extends FileCardType {
-    cardRemovalHandler: (url: string) => void
+    cardRemovalHandler: () => void
 }
 
 
@@ -67,16 +67,16 @@ const FileCard = (props: FileCardProps) => {
     const handleDeleteFile = () => {
         deleteItem(props.fileURL)
             .then(result => {
-                props.cardRemovalHandler(props.fileURL);
                 if (Platform.OS === "android") {
                     ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
                 } else {
                     Alert.alert("File deleted!");
                 }
+                props.cardRemovalHandler();
             })
             .catch(error => {
                 Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
-            });
+            })
     };
     
 

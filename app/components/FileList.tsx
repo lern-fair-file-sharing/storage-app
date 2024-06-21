@@ -19,8 +19,8 @@ const FileList = (props: FileListType) => {
         setFolders(props.folders);
     }, [props.files, props.folders]);
 
-    const cardRemovalHandler = (url: string) => {
-        setFiles(prevFiles => prevFiles.filter(file => file.fileURL !== url));
+    const cardRemovalHandler = () => {
+        props.refreshFunction ? props.refreshFunction() : null
     }
 
     return (

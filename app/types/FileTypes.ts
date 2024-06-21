@@ -14,4 +14,5 @@ export interface FileCardType {
 export interface FileListType {
     folders: FolderCardType[],
     files: FileCardType[],
+    refreshFunction?: () => void
 }

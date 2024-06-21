@@ -52,7 +52,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                 <RefreshControl refreshing={false} onRefresh={onRefresh} />
         }
             >
-            <FileList folders={allFolders} files={allFiles}/>
+            <FileList folders={allFolders} files={allFiles} refreshFunction={fetchFolderContent}/>
         </ScrollView>     
     );
 };

@@ -62,7 +62,7 @@ const FilesTabScreen = () => {
     const renderFileListSection = (title: string, files: FileCardType[]) => (
         <View style={styles.fileActivitySection}>
             <Text style={styles.fileActivityTime}>{title}:</Text>
-            <FileList folders={[]} files={files} />
+            <FileList folders={[]} files={files} refreshFunction={fetchAllData}/>
         </View>
     );
 
@@ -154,7 +154,7 @@ const FilesTabScreen = () => {
                                 <RefreshControl refreshing={false} onRefresh={onRefresh} />
                             }
                         >
-                            <FileList folders={allFolders} files={allFiles}/>
+                            <FileList folders={allFolders} files={allFiles} refreshFunction={fetchAllData}/>
                         </ScrollView>
                     )
                 }

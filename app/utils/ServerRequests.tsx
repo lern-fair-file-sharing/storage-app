@@ -4,6 +4,7 @@ import * as FileSystem from "expo-file-system";
 import { Alert, Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Sharing from "expo-sharing";
+import axios from "axios";
 var parseString = require("react-native-xml2js").parseString;
 
 
@@ -141,19 +142,19 @@ export const fetchFile = (fileURL: string): Promise<string | void> => {
             });
         })
         .catch(error => {
-            console.error(error);
+            throw error;
         });
 };
 
 
-export const downloadFile = (fileURL: string): Promise<boolean | void> => {
+export const downloadFile = (fileURL: string): Promise<void> => {
     return fetchFile(fileURL)
         .then(base64Data => {
             if (!base64Data) {
                 throw new Error("Failed to fetch file content");
             }
 
-            const fileName = fileURL.split("/").pop();
+            const fileName = fileURL.split("/").pop()?.split("%20").join("-");
             if (!fileName) {
                 throw new Error("Invalid file URL");
             }
@@ -192,30 +193,25 @@ export const downloadFile = (fileURL: string): Promise<boolean | void> => {
                 });
             }
         })
-        .then((result) => result)
         .catch(error => {
             console.error('Download File Error:', error);
             return error;
         });
 };
 
-
 export const deleteItem = async (itemURL: string): Promise<void> => {
-    const requestHeaders = new Headers();
-    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
-
-    const requestOptions = {
-        method: "DELETE",
-        headers: requestHeaders,
-        redirect: "follow"
+    const requestConfig = {
+        headers: {
+            Authorization: `Basic ${process.env.EXPO_PUBLIC_TOKEN}`,
+        }
     };
 
-    return fetch(machineURL+itemURL, requestOptions as RequestInit)
-        .then((response) => {})
-        .catch((error) => {
-            throw error;
-        });
-}
+    try {
+        const response = await axios.delete(machineURL + itemURL, requestConfig);
+    } catch (error) {
+        throw error;
+    }
+};
 
 export const createFolder = async (folderURL: string): Promise<boolean | void> => {
     const requestHeaders = new Headers();
