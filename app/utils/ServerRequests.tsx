@@ -192,7 +192,7 @@ export const downloadFile = (fileURL: string): Promise<boolean | void> => {
                 });
             }
         })
-        .then((result) => result)
+        .then((result) => true)
         .catch(error => {
             console.error('Download File Error:', error);
             return false;
