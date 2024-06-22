@@ -1,3 +1,5 @@
+import * as DocumentPicker from "expo-document-picker";
+import { DocumentPickerAsset, DocumentPickerResult } from "expo-document-picker";
 
 
 export enum LastModified {
@@ -36,5 +38,35 @@ export function getTimeFrame(dateTimeString: string): LastModified {
     } catch (error) {
         console.error(`Error: Could not parse date time string '${dateTimeString}'`, error);
         return LastModified.OLDER;
+    }
+}
+
+
+export async function pickFileFromDevice(): Promise<{blob: Blob, fileName: string} | void> {
+    try {
+        let result: DocumentPickerResult = await DocumentPicker.getDocumentAsync({});
+        if (result?.assets) {
+            const uploadedAsset: DocumentPickerAsset = result.assets[0];
+            
+            return fetch(uploadedAsset.uri)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`FILE error - status: ${response.status}`);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    return {
+                        blob: blob,
+                        fileName: uploadedAsset.name
+                    }
+                })
+                .catch(error => {
+                    throw error;
+                });
+        }
+    }
+    catch (error) {
+        console.error("Error picking document:", error);
     }
 }

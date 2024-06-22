@@ -14,7 +14,7 @@ const FileList = (props: FileListType) => {
     const [files, setFiles] = useState<FileCardType[]>([]);
     const [folders, setFolders] = useState<FolderCardType[]>([]);
 
-    const PERSONAL_SPACE_FOLDER_NAME = "Pesönliche Ablage";
+    const PERSONAL_SPACE_FOLDER_NAME = "Persönliche Ablage";
 
     // Moves the "personal space" folder to the very top if it exists
     const personalFolderToTop = (folders: FolderCardType[]) => {
@@ -30,13 +30,13 @@ const FileList = (props: FileListType) => {
 
     useEffect(() => {
         setFiles(props.files);
-        const rearangedFolders = personalFolderToTop(props.folders);
-        setFolders(rearangedFolders);
+        const rearrangedFolders = personalFolderToTop(props.folders);
+        setFolders(rearrangedFolders);
         
     }, [props.files, props.folders]);
 
-    const cardRemovalHandler = (url: string) => {
-        setFiles(prevFiles => prevFiles.filter(file => file.fileURL !== url));
+    const cardRemovalHandler = () => {
+        props.refreshFunction ? props.refreshFunction() : null
     }
 
     return (
