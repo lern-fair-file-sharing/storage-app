@@ -8,6 +8,7 @@ import { FolderCardType, FileCardType } from "../types/FileTypes";
 import Feather from "@expo/vector-icons/Feather";
 import Colors from "../utils/Colors";
 import { pickFileFromDevice } from "../utils/utils";
+import { PERSONAL_SPACE_FOLDER_NAME } from "../utils/utils";
 
 
 
@@ -20,11 +21,24 @@ export type RootStackParamList = {
 const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "FolderContentScreen">) => {
     const navigation = useNavigation();
 
+    const [isPersonalFolder, setIsPersonalFolder] = useState<boolean>(false);
+    const [allFolders, setAllFolders] = useState<FolderCardType[]>([] as FolderCardType[]);
+    const [allFiles, setAllFiles] = useState<FileCardType[]>([] as FileCardType[]);
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: decodeURI(props.route.params?.folderName),
         });
     }, [navigation]);
+
+    useEffect(() => {
+        fetchFolderContent();
+        setIsPersonalFolder(
+            decodeURI(props.route.params?.folderURL)
+            .endsWith(`/files/${process.env.EXPO_PUBLIC_USER}/${PERSONAL_SPACE_FOLDER_NAME}/`)
+        );
+    }, []);
+
 
     const onRefresh = useCallback(() => {
         fetchFolderContent();
@@ -37,19 +51,10 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
             setAllFolders(content.folders);
         }
     };
-
-    const [allFolders, setAllFolders] = useState<FolderCardType[]>([] as FolderCardType[]);
-    const [allFiles, setAllFiles] = useState<FileCardType[]>([] as FileCardType[]);
-
-    useEffect(() => {
-        fetchFolderContent();
-    }, []);
-
-
     
     const uploadFileHandler = async () => {
         try {
-            pickFileFromDevice().then(async (uploadedFileData) => {
+            pickFileFromDevice().then((uploadedFileData) => {
                 if (uploadedFileData) {
                     return uploadFile(uploadedFileData.blob, `${props.route.params?.folderURL}${encodeURI(uploadedFileData.fileName)}`);
                 }
@@ -62,10 +67,14 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                         Alert.alert("File uploaded!");
                     }
                 }
+            }).then(async () => {
+                // Refresh after 2 seconds to see new file
+                setTimeout(() => {
+                    fetchFolderContent();
+                }, 2500)
             }).catch((error) => {
                 throw error;
-            });
-            
+            });   
         }
         catch {
             Alert.alert("File upload failed!");
@@ -82,12 +91,17 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                 >
                 <FileList folders={allFolders} files={allFiles} refreshFunction={onRefresh}/>
             </ScrollView>
-            <View style={styles.uploadSection}>
-                <TouchableOpacity style={styles.uploadButton} onPress={uploadFileHandler}>
-                    <Feather name="download" size={25} color="#fff" />
-                    <Text style={styles.uploadText}>UPLOAD</Text>
-                </TouchableOpacity>
-            </View>
+            {
+                isPersonalFolder ?
+                    <View style={styles.uploadSection}>
+                        <TouchableOpacity style={styles.uploadButton} onPress={uploadFileHandler}>
+                            <Feather name="upload" size={25} color="#fff" />
+                            <Text style={styles.uploadText}>UPLOAD</Text>
+                        </TouchableOpacity>
+                    </View>
+                :
+                    null
+            }
             
         </View>
     );

@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { FileCardType, FolderCardType, FileListType } from "../types/FileTypes";
 import FileCard from "./FileCard";
 import FolderCard from "./FolderCard";
-
+import { PERSONAL_SPACE_FOLDER_NAME } from "../utils/utils";
 
 
 
@@ -13,8 +13,6 @@ const FileList = (props: FileListType) => {
 
     const [files, setFiles] = useState<FileCardType[]>([]);
     const [folders, setFolders] = useState<FolderCardType[]>([]);
-
-    const PERSONAL_SPACE_FOLDER_NAME = "Persönliche Ablage";
 
     // Moves the "personal space" folder to the very top if it exists
     const personalFolderToTop = (folders: FolderCardType[]) => {

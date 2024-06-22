@@ -10,6 +10,9 @@ export enum LastModified {
 }
 
 
+export const PERSONAL_SPACE_FOLDER_NAME = "Persönliche Ablage";
+
+
 export function getTimeFrame(dateTimeString: string): LastModified {
     try {
         const dateTime = new Date(dateTimeString);

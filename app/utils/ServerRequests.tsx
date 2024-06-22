@@ -214,7 +214,6 @@ export const deleteItem = async (itemURL: string): Promise<void> => {
 
         if (!response.ok) {
             const errorMessage = await response.text();
-            console.debug(errorMessage);
             throw new Error(errorMessage);
         }
     } catch (error) {
