@@ -1,6 +1,5 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Pressable } from "react-native";
 import Popover from "react-native-popover-view";
-import { Alert } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { AntDesign } from "@expo/vector-icons";
@@ -15,7 +14,7 @@ const noPreviewImage = require("../../assets/basic-file-icon.png");
 
 
 interface FileCardProps extends FileCardType {
-    cardRemovalHandler?: (url: string) => void
+    cardRemovalHandler: () => void
 }
 
 
@@ -30,14 +29,7 @@ const FileCard = (props: FileCardProps) => {
             setFileType("pdf");
         }
         else if (props.fileType.split("/")[0] === "image") {
-            const fetchImage = async () => {
-                try {
-                    const base64Image = await fetchFile(props.fileURL);
-                    setPreviewImage({ uri: base64Image });
-                } catch (error) {
-                    console.error(error);
-                }
-            };
+            
             fetchImage();
             setFileType("image");
         }
@@ -46,26 +38,47 @@ const FileCard = (props: FileCardProps) => {
         }
     }, [props.fileType, props.fileURL]);
 
-    const handleDownloadFile = async() => {
-        const status = await downloadFile(props.fileURL);
-        if (status) {
-            ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
-        }
-        else {
-            Alert.alert("Download Failed", "An error occurred while downloading the file.");
-        }
-    }
+    const fetchImage = () => {
+        fetchFile(props.fileURL)
+            .then(base64Image => {
+                setPreviewImage({ uri: base64Image });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
+    
+    const handleDownloadFile = () => {
+        downloadFile(props.fileURL)
+            .then(status => {
+                if (Platform.OS === "android") {
+                    ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
+                } else {
+                    Alert.alert("File downloaded!");
+                }
+            })
+            .catch(error => {
+                console.error('Download File Error:', error);
+                Alert.alert("Download Failed", "An unexpected error occurred while downloading the file.");
+            });
+    };
 
-    const handleDeleteFile = async() => {
-        const status = await deleteItem(props.fileURL);
-        if (status) {
-            props.cardRemovalHandler?(props.fileURL) : undefined;
-            ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
-        }
-        else {
-            Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
-        }
-    }
+    
+    const handleDeleteFile = () => {
+        deleteItem(props.fileURL)
+            .then(result => {
+                if (Platform.OS === "android") {
+                    ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
+                } else {
+                    Alert.alert("File deleted!");
+                }
+                props.cardRemovalHandler();
+            })
+            .catch(error => {
+                Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
+            })
+    };
+    
 
     return (
         <View style={styles.container}>
@@ -80,8 +93,11 @@ const FileCard = (props: FileCardProps) => {
             </View>
 
             <Popover
+                animationConfig={{
+                    duration: 300
+                }}
                 from={(
-                    <TouchableOpacity>
+                    <TouchableOpacity style={styles.openSettingsButton}>
                         <Entypo name="dots-three-vertical" size={20} color={Colors.primary} />
                     </TouchableOpacity>
                 )}>
@@ -134,12 +150,17 @@ const styles = StyleSheet.create({
     },
     tagPlaceHolder: {
         flex: 1,
-        backgroundColor: "#cfcfcf",
+        backgroundColor: "#dfdfdf",
         height: 20,
     },
     fileName: {
+        flex: 1,
         fontSize: 15,
         color: Colors.primary,
+    },
+    openSettingsButton: {
+        flex: 1,
+        alignItems: "center",
     },
     settingModal: {
         width: 250,
