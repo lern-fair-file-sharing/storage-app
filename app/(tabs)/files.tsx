@@ -11,7 +11,7 @@ import FolderContentScreen, { RootStackParamList }  from "../components/FolderCo
 import Colors from "../utils/Colors";
 import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
 import { getTimeFrame, LastModified } from "../utils/utils";
-
+import FileSearchBar from "../components/FileSearchBar";
 
 enum FileView {
     Activity,
@@ -135,7 +135,7 @@ const FilesTabScreen = () => {
                 </View>
 
                 <View style={styles.searchSection}>
-                    {/* TODO create and add search component */}
+                    <FileSearchBar />
                 </View>
 
                 <View
