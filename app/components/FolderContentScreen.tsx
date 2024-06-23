@@ -182,7 +182,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                             placeholder="Wähle einen Ordner Namen..."
                             value={newFolderName}
                             onChangeText={(text: string) => {
-                                if (/[^a-zA-Z0-9-_ ]/.test(text)) {
+                                if (/[^-\w\s\p{L}]/u.test(text) || text.length > 128) {
                                     setInvalidFolderName(true);
                                 }
                                 else {
@@ -193,7 +193,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                         />
                         {
                             invalidFolderName ?
-                                <Text style={{color: "red", textAlign: "center"}}>Nur Buchstaben, Zahlen, "-", "_" und Leerzeichen sind erlaubt!</Text>
+                                <Text style={{color: "red", textAlign: "center"}}>Nur Buchstaben, Zahlen, "-", "_" und Leerzeichen sind erlaubt (max. 128)!</Text>
                             : null
                         }
                         <TouchableOpacity
