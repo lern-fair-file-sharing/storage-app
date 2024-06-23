@@ -25,6 +25,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
     const [allFolders, setAllFolders] = useState<FolderCardType[]>([] as FolderCardType[]);
     const [allFiles, setAllFiles] = useState<FileCardType[]>([] as FileCardType[]);
     const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
+    const [invalidFolderName, setInvalidFolderName] = useState<boolean>(false);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -53,7 +54,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
         }
     };
 
-    const [inputText, setInputText] = useState('');
+    const [newFolderName, setNewFolderName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
 
     const uploadFileHandler = async () => {
@@ -88,7 +89,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
 
     const addFolderHandler = async () => {
         try {
-            await createFolder(`${props.route.params?.folderURL}/${inputText}`).then((status) => {
+            await createFolder(`${props.route.params?.folderURL}/${newFolderName}`).then((status) => {
                 if (status) {
                     if (Platform.OS === "android") {
                         ToastAndroid.show("File uploaded!", ToastAndroid.SHORT);
@@ -137,7 +138,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                     )}>
                         <View style={styles.settingModal}>
                             <TouchableOpacity style={styles.settingButton} onPress={() => uploadFileHandler()}>
-                                <AntDesign name="addfolder" size={25} color={Colors.primary} />
+                                <AntDesign name="addfile" size={25} color={Colors.primary} />
                                 <Text style={styles.settingText}>NEUE DATEI</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.settingButton} onPress={() => {
@@ -148,7 +149,7 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                                 }, 1000)
                                 setSettingsPopupVisible(false);
                             }}>
-                                <AntDesign name="addfile" size={25} color={Colors.primary} />
+                                <AntDesign name="addfolder" size={25} color={Colors.primary} />
                                 <Text style={styles.settingText}>NEUER ORDNER</Text>
                             </TouchableOpacity>
                         </View>
@@ -179,17 +180,29 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
                         <TextInput
                             style={styles.textInput}
                             placeholder="Wähle einen Ordner Namen..."
-                            value={inputText}
+                            value={newFolderName}
                             onChangeText={(text: string) => {
-                                setInputText(text);
+                                if (/[^a-zA-Z0-9-_ ]/.test(text)) {
+                                    setInvalidFolderName(true);
+                                }
+                                else {
+                                    setInvalidFolderName(false);
+                                }
+                                setNewFolderName(text);
                             }}
                         />
+                        {
+                            invalidFolderName ?
+                                <Text style={{color: "red", textAlign: "center"}}>Nur Buchstaben, Zahlen, "-", "_" und Leerzeichen sind erlaubt!</Text>
+                            : null
+                        }
                         <TouchableOpacity
-                            style={styles.addFolderButton}
+                            style={{ ...styles.addFolderButton, backgroundColor: invalidFolderName ? "#cacaca" : Colors.yellow }}
+                            disabled={invalidFolderName}
                             onPress={() => {
                                 setModalVisible(false);
                                 addFolderHandler();
-                                setInputText("");
+                                setNewFolderName("");
                             }}
                         >
                             <Feather name="plus" size={20} color="#fff" />
@@ -271,32 +284,32 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     modalContainer: {
         width: 300,
         padding: 20,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 10,
-        alignItems: 'center',
+        display: "flex",
+        gap: 10,
+        alignItems: "center",
     },
     modalTitle: {
         fontWeight: "bold",
         color: Colors.primary,
         fontSize: 20,
-        marginBottom: 20,
     },
     textInput: {
-        width: '100%',
+        width: "100%",
         padding: 10,
         borderColor: Colors.secondary,
         borderRadius: 3,
         borderWidth: 1,
-        marginBottom: 20,
     },
-    inputText: {
+    newFolderName: {
         marginTop: 20,
         color: Colors.primary,
         fontSize: 18,
