@@ -77,7 +77,7 @@ const FolderCard = (props: FolderCardProps) => {
                     <View style={styles.settingModal}>
                         <TouchableOpacity style={styles.settingButton} onPress={() => handleDeleteFolder()}>
                             <AntDesign name="delete" size={25} color={Colors.primary} />
-                            <Text style={styles.settingText}>DELETE</Text>
+                            <Text style={styles.settingText}>LÖSCHEN</Text>
                         </TouchableOpacity>
                     </View>
                 </Popover>
