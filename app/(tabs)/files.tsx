@@ -10,7 +10,7 @@ import { FileCardType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
 import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
-import { getTimeFrame, LastModified } from "../utils/utils";
+import { getTimeFrame, LastModified, PERSONAL_SPACE_FOLDER_NAME } from "../utils/utils";
 
 
 enum FileView {
@@ -26,14 +26,31 @@ const FilesTabScreen = () => {
     const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
     const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
 
+    const FILE_URL = `/remote.php/dav/files/${process.env.EXPO_PUBLIC_USER}/`;
+
+    const personalFolderToTop = (folders: FolderCardType[]) => {
+        const index = folders.findIndex(folder => decodeURIComponent(folder.folderName) === PERSONAL_SPACE_FOLDER_NAME);
+
+        if (index !== -1) {
+            const [personalSpaceFolder] = folders.splice(index, 1);
+            folders.unshift(personalSpaceFolder);
+        }
+
+        return folders;
+    }
+
+    // Fetch all root level files and folders
     const fetchFolderContent = async () => {
-        const content = await getFolderContent("/remote.php/dav/files/testuser/");
+        const content = await getFolderContent(FILE_URL);
         if (content) {
             setAllFiles(content.files);
-            setAllFolders(content.folders);
+
+            let folders = personalFolderToTop(content.folders);
+            setAllFolders(folders);
         }
     };
     
+    // Fetch latest filles
     const fetchLatestFiles = async () => {
         const results = await searchLatestFiles();
         if (results) {
@@ -41,13 +58,14 @@ const FilesTabScreen = () => {
         }
     };
 
+    // Fetch latest files and all root level files and folders
     const fetchAllData = () => {
         fetchFolderContent();
         fetchLatestFiles();
     }
 
+    // Refetch data on refresh
     const onRefresh = useCallback(() => { fetchAllData() }, []);
-
 
     useEffect(() => {
         fetchAllData();

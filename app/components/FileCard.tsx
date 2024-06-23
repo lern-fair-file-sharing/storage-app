@@ -21,6 +21,7 @@ interface FileCardProps extends FileCardType {
 const FileCard = (props: FileCardProps) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
     const [fileType, setFileType] = useState<string>("unknown");
+    const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
 
     useEffect(() => {
         // Choose preview image (choices: PDF default, preview image from URL, placeholder image)
@@ -51,11 +52,7 @@ const FileCard = (props: FileCardProps) => {
     const handleDownloadFile = () => {
         downloadFile(props.fileURL)
             .then(status => {
-                if (Platform.OS === "android") {
-                    ToastAndroid.show("File downloaded!", ToastAndroid.SHORT);
-                } else {
-                    Alert.alert("File downloaded!");
-                }
+                setSettingsPopupVisible(false);
             })
             .catch(error => {
                 console.error('Download File Error:', error);
@@ -66,7 +63,8 @@ const FileCard = (props: FileCardProps) => {
     
     const handleDeleteFile = () => {
         deleteItem(props.fileURL)
-            .then(result => {
+            .then(_ => {
+                setSettingsPopupVisible(false);
                 if (Platform.OS === "android") {
                     ToastAndroid.show("File deleted!", ToastAndroid.SHORT);
                 } else {
@@ -88,16 +86,18 @@ const FileCard = (props: FileCardProps) => {
                 resizeMode="contain"
             />
             <View style={styles.fileInfos}>
-                <Text style={styles.fileName}>{props.fileName.replace("%", " ")}</Text>
+                <Text style={styles.fileName}>{decodeURIComponent(props.fileName)}</Text>
                 <View style={styles.tagPlaceHolder} />
             </View>
 
             <Popover
+                isVisible={settingsPopupVisible}
+                onRequestClose={() => setSettingsPopupVisible(false)}
                 animationConfig={{
                     duration: 300
                 }}
                 from={(
-                    <TouchableOpacity style={styles.openSettingsButton}>
+                    <TouchableOpacity style={styles.openSettingsButton} onPress={() => setSettingsPopupVisible(true)}>
                         <Entypo name="dots-three-vertical" size={20} color={Colors.primary} />
                     </TouchableOpacity>
                 )}>
@@ -108,12 +108,10 @@ const FileCard = (props: FileCardProps) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.settingButton} onPress={() => handleDeleteFile()}>
                         <AntDesign name="delete" size={25} color={Colors.primary} />
-                        <Text style={styles.settingText}>DELETE</Text>
+                        <Text style={styles.settingText}>LÖSCHEN</Text>
                     </TouchableOpacity>
                 </View>
             </Popover>
-
-            
         </View>
     );
 };
@@ -164,7 +162,6 @@ const styles = StyleSheet.create({
     },
     settingModal: {
         width: 250,
-        height: 150,
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -173,12 +170,13 @@ const styles = StyleSheet.create({
     settingButton: {
         flex: 1,
         borderRadius: 3,
+        height: 75,
         backgroundColor: Colors.surface,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        gap: 20
+        gap: 10
     },
     settingText: {
         fontWeight: "bold",
