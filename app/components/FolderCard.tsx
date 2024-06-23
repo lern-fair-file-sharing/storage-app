@@ -24,9 +24,12 @@ const FolderCard = (props: FolderCardProps) => {
     const [deletable, setDeleteable] = useState<boolean>(false);
 
     useEffect(() => {
+        // Folders are deletable if they are subfolders of the persona-space folder
+        const peronalSpacepath = `/files/${process.env.EXPO_PUBLIC_USER}/${PERSONAL_SPACE_FOLDER_NAME}/`;
+
         setDeleteable(
-            decodeURI(props.folderURL)
-            .endsWith(`/files/${process.env.EXPO_PUBLIC_USER}/${PERSONAL_SPACE_FOLDER_NAME}/${decodeURI(props.folderName)}/`)
+            decodeURI(props.folderURL).includes(peronalSpacepath) &&
+            !decodeURI(props.folderURL).endsWith(peronalSpacepath)
         );
     }, []);
 
