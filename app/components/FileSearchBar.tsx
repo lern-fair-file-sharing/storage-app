@@ -19,10 +19,9 @@ const FileSearchBar: React.FunctionComponent<SearchBarComponentProps> = () => {
       }
       var results = await searchFilesByKeyword(search);
 
-      //if (results) {
-      //  setSearchResults(results);
-      //  console.log(results);
-      //}
+      if (results && results.length > 0 && results !== undefined) {
+        setSearchResults(results);
+      }
   };
 
   return (

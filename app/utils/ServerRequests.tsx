@@ -133,6 +133,10 @@ export const searchFilesByKeyword = async(keyword:String): Promise<FileCardType[
     return fetch(machineURL +"/remote.php/dav", requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => {
+            if (result === undefined) {
+                return [];
+            }
+            else {
             parseString(result, function (err: any, result: any) {
                 result as PropSearchResponseType;
                 result["d:multistatus"]["d:response"].forEach((element: any) => {
@@ -147,8 +151,9 @@ export const searchFilesByKeyword = async(keyword:String): Promise<FileCardType[
                 });
             });
             return fileList;
+            }
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {return [] as FileCardType[];});
 };
 
 export const fetchFile = (fileURL: string): Promise<string | void> => {
