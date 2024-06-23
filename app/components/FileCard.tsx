@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
     },
     settingModal: {
         width: 250,
-        height: 150,
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -171,6 +170,7 @@ const styles = StyleSheet.create({
     settingButton: {
         flex: 1,
         borderRadius: 3,
+        height: 75,
         backgroundColor: Colors.surface,
         display: "flex",
         flexDirection: "row",

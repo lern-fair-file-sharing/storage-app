@@ -4,8 +4,6 @@ import { StyleSheet, View } from "react-native";
 import { FileCardType, FolderCardType, FileListType } from "../types/FileTypes";
 import FileCard from "./FileCard";
 import FolderCard from "./FolderCard";
-import { PERSONAL_SPACE_FOLDER_NAME } from "../utils/utils";
-
 
 
 const FileList = (props: FileListType) => {
@@ -14,22 +12,9 @@ const FileList = (props: FileListType) => {
     const [files, setFiles] = useState<FileCardType[]>([]);
     const [folders, setFolders] = useState<FolderCardType[]>([]);
 
-    // Moves the "personal space" folder to the very top if it exists
-    const personalFolderToTop = (folders: FolderCardType[]) => {
-        const index = folders.findIndex(folder => decodeURIComponent(folder.folderName) === PERSONAL_SPACE_FOLDER_NAME);
-
-        if (index !== -1) {
-            const [personalSpaceFolder] = folders.splice(index, 1);
-            folders.unshift(personalSpaceFolder);
-        }
-
-        return folders;
-    }
-
     useEffect(() => {
         setFiles(props.files);
-        const rearrangedFolders = personalFolderToTop(props.folders);
-        setFolders(rearrangedFolders);
+        setFolders(props.folders);
         
     }, [props.files, props.folders]);
 
@@ -45,6 +30,7 @@ const FileList = (props: FileListType) => {
                     folderName={folderData.folderName}
                     folderURL={folderData.folderURL}
                     navigation={navigation}
+                    cardRemovalHandler={cardRemovalHandler}
                 />
             ))}
             {files.map((fileData: FileCardType) => (
