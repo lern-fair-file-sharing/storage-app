@@ -5,7 +5,6 @@ import { StyleSheet, View, Text, ScrollView, RefreshControl } from "react-native
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
-import FileCard from "../components/FileCard";
 import { FileCardType, FolderCardType } from "../types/FileTypes";
 import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
@@ -207,7 +206,6 @@ const styles = StyleSheet.create({
     },
     searchSection: {
         height: 50,
-        backgroundColor: "#cfcfcf",
     },
     timeBasedFileActivities: {
         
