@@ -1,46 +1,76 @@
 import React from 'react';
-import { View, ScrollView } from 'react-native';
-import CourseCard from '../components/classCard';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import Colors from '../utils/Colors';
+import ClassCard from '../components/classCard';
+import { time } from 'console';
 
-const ClassesPage =  () => {
+const ClassesPage = () => {
     const classes = [
         {
+            time: 'Dienstag, 13:00',
             title: 'Mathematik',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+            members: '3 von 10 Plätzen belegt',
+            year: '5. Klasse',
+            status: 'Öffenlich',         
             imageUrl: 'https://picsum.photos/200',
         },
         {
+            time: 'Mittwoch, 14:00',
             title: 'Physik',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+            members: '3 von 10 Plätzen belegt',
+            year: '6. Klasse',
+            status: 'Privat',
             imageUrl: 'https://picsum.photos/200',
         },
         {
+            time: 'Donnerstag, 15:00',
             title: 'Chemie',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+            members: '3 von 10 Plätzen belegt',
+            year: '7. Klasse',
+            status: 'Öffenlich',
             imageUrl: 'https://picsum.photos/200',
         },
         {
+            time: 'Freitag, 16:00',
             title: 'Biologie',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+            members: '3 von 10 Plätzen belegt',
+            year: '8. Klasse',
+            status: 'Privat',            
             imageUrl: 'https://picsum.photos/200',
         },
     ];
 
-return (
-    <ScrollView>
-        <View>
-            {classes.map((course, index) => (
-                <CourseCard
-                    key={index}
-                    title={course.title}
-                    description={course.description}
-                    imageUrl={course.imageUrl}
-                    onPress={() => {}}
-                />
-            ))}
+    return (
+        <View style={styles.container}>
+            <ScrollView style={styles.list}>
+                <View>
+                    {classes.map((course, index) => (
+                        <ClassCard
+                            key={index}
+                            time={course.time}
+                            title={course.title}
+                            members={course.members}
+                            year={course.year}
+                            status={course.status}
+                            imageUrl={course.imageUrl}
+                            onPress={() => { }}
+                        />
+                    ))}
+                </View>
+            </ScrollView>
         </View>
-    </ScrollView>
-);
+    );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: Colors.background,
+    },
+    list: {
+        flex: 1,
+        marginTop: 10,
+    }
+});
 
 export default ClassesPage;
