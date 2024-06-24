@@ -11,10 +11,12 @@ import Colors from "../utils/Colors";
 import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
 import { getTimeFrame, LastModified } from "../utils/utils";
 import FileSearchBar from "../components/FileSearchBar";
+import FileSearchScreen from "../components/FileSearchScreen";
 
 enum FileView {
     Activity,
     Courses,
+    Search
 }
 
 
@@ -172,6 +174,10 @@ const FilesPage = () => {
                 name="FilesTabScreen"
                 component={FilesTabScreen}
                 options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="FileSearchScreen"
+                component={FileSearchScreen}
             />
             <Stack.Screen
                 name="FolderContentScreen"
