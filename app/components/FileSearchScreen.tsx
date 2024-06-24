@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type RootStackParamList = {
     FilesTabScreen: undefined,
+    FolderContentScreen: { folderPath: string, folderName: string },
     FileSearchScreen: { searchParam: string };
 };
 
