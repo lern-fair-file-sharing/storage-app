@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { SearchBar } from '@rneui/themed';
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import FileCard from "../components/FileCard";
+import { StyleSheet } from 'react-native';
 import { FileCardType } from "../types/FileTypes";
 import { searchFilesByKeyword } from '../utils/ServerRequests';
-import { color } from '@rneui/base';
-import Colors from '../utils/Colors';
 
 
 type SearchBarProps = {
