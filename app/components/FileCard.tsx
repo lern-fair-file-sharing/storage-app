@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Pressable } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Pressable, Modal } from "react-native";
 import Popover from "react-native-popover-view";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -22,6 +22,7 @@ const FileCard = (props: FileCardProps) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
     const [fileType, setFileType] = useState<string>("unknown");
     const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
+    const [isPreviewVisible, setIsPreviewVisible] = useState<boolean>(false);
 
     useEffect(() => {
         // Choose preview image (choices: PDF default, preview image from URL, placeholder image)
@@ -60,7 +61,6 @@ const FileCard = (props: FileCardProps) => {
             });
     };
 
-    
     const handleDeleteFile = () => {
         deleteItem(props.fileURL)
             .then(_ => {
@@ -76,10 +76,15 @@ const FileCard = (props: FileCardProps) => {
                 Alert.alert("Deletion Failed!", `An error occurred while deleting the file.`);
             })
     };
-    
+
+    const displayFile = () => {
+      if (Platform.OS === "ios") {
+        setIsPreviewVisible(true);
+      }
+    };    
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={displayFile}>
             <Image
                 style={fileType === "image" ? styles.filePreview : styles.pdfPreview}
                 source={previewImage}
@@ -112,7 +117,25 @@ const FileCard = (props: FileCardProps) => {
                     </TouchableOpacity>
                 </View>
             </Popover>
-        </View>
+            {Platform.OS === "ios" && (
+              <Modal visible={isPreviewVisible} animationType="slide">
+                {fileType === "image" ? (
+                  <Image
+                    style={styles.imagePreview}
+                    source={previewImage}
+                  />
+                ) : (
+                  <Text>Error</Text>
+                )}
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setIsPreviewVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>X</Text>
+                </TouchableOpacity>
+              </Modal>
+      )}
+        </TouchableOpacity>
     );
 };
 
@@ -182,6 +205,23 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: Colors.primary,
         fontSize: 17
+    },
+    closeButton: {
+      position: "absolute",
+      top: 40,
+      right: 20,
+      backgroundColor: Colors.primary,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 5,
+    },
+    closeButtonText: {
+      color: Colors.surface,
+      fontWeight: "bold",
+    },
+    imagePreview: {
+      flex: 1,
+      resizeMode: 'contain'
     }
 });
 
