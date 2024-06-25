@@ -57,7 +57,6 @@ const FilesTabScreen = () => {
         }
     };
     
-    // Fetch latest filles
     const fetchLatestFiles = async () => {
         const results = await searchLatestFiles();
         if (results) {
@@ -135,7 +134,7 @@ const FilesTabScreen = () => {
 
     return (
 
-        <TouchableWithoutFeedback onPress={() => { console.debug("wheeeee"); Keyboard.dismiss() }}>
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
             <View style={styles.container}>
                 <View style={styles.content}>
                     <View style={styles.fileViews}>
