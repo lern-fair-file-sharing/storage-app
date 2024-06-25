@@ -6,8 +6,6 @@ import FileCard from "./FileCard";
 import FolderCard from "./FolderCard";
 
 
-
-
 const FileList = (props: FileListType) => {
     const navigation = useNavigation();
 
@@ -17,6 +15,7 @@ const FileList = (props: FileListType) => {
     useEffect(() => {
         setFiles(props.files);
         setFolders(props.folders);
+        
     }, [props.files, props.folders]);
 
     const cardRemovalHandler = () => {
@@ -31,6 +30,7 @@ const FileList = (props: FileListType) => {
                     folderName={folderData.folderName}
                     folderURL={folderData.folderURL}
                     navigation={navigation}
+                    cardRemovalHandler={cardRemovalHandler}
                 />
             ))}
             {files.map((fileData: FileCardType) => (
