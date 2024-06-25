@@ -159,7 +159,6 @@ export const searchFilesByKeyword = async(keyword:String): Promise<FileCardType[
 export const fetchFile = (fileURL: string): Promise<string | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
-    //requestHeaders.append("If-none-match", "browtf");
 
     const requestOptions: RequestInit = {
         method: "GET",
@@ -212,14 +211,14 @@ export const downloadFile = (fileURL: string): Promise<void> => {
                                     });
                                 })
                                 .catch(error => {
-                                    return error;
+                                    throw error;
                                 });
                         } else {
-                            return Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
+                            Sharing.shareAsync(base64Data, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
                         }
                     })
                     .catch(error => {
-                        return error;
+                        throw error;
                     });
             } else {
                 const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
@@ -230,13 +229,13 @@ export const downloadFile = (fileURL: string): Promise<void> => {
                     return Sharing.shareAsync(fileUri, { mimeType: "application/octet-stream", dialogTitle: "Share the file" });
                 })
                 .catch(error => {
-                    return error;
+                    throw error;
                 });
             }
         })
         .catch(error => {
             console.error('Download File Error:', error);
-            return error;
+            throw error;
         });
 };
 
@@ -256,7 +255,6 @@ export const deleteItem = async (itemURL: string): Promise<void> => {
 
         if (!response.ok) {
             const errorMessage = await response.text();
-            console.debug(errorMessage);
             throw new Error(errorMessage);
         }
     } catch (error) {
@@ -281,7 +279,7 @@ export const createFolder = async (folderURL: string): Promise<boolean | void> =
         .catch((error) => { console.error(error); return false });
 }
 
-export const uploadFile = async (file: Blob, location: String): Promise<boolean | void> => {
+export const uploadFile = async (file: Blob, location: string ): Promise<boolean | void> => {
     const requestHeaders = new Headers();
     requestHeaders.append("Content-Type", "text/plain");
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
@@ -294,11 +292,13 @@ export const uploadFile = async (file: Blob, location: String): Promise<boolean 
         body: raw,
         redirect: "follow"
     };
-
-    fetch(machineURL + location, requestOptions as RequestInit)
+    
+    fetch(machineURL+location, requestOptions as RequestInit)
         .then((response) => response.text())
         .then((result) => { return true })
         .catch((error) => {
             console.error(error); return false
         });
 }
+
+
