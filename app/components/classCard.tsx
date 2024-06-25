@@ -27,7 +27,7 @@ const ClassCard = ({ time, title, members, year, status, imageUrl, onPress }: Cl
           <Text style={{ fontWeight: 'bold' }}>Jahrgangsstufe:</Text> {year}
         </Text>
         <Text style={styles.status}>
-          <Text style={{ fontWeight: 'bold' }}>Status:</Text>{status}
+          <Text style={{ fontWeight: 'bold' }}>Status: </Text>{status}
         </Text>
       </View>
     </TouchableOpacity>
