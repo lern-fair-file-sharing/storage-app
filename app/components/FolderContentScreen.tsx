@@ -15,7 +15,6 @@ import Popover from "react-native-popover-view";
 export type RootStackParamList = {
     FilesTabScreen: undefined,
     FolderContentScreen: { folderURL: string, folderName: string };
-    FileSearchScreen: { searchParam: string };
 };
 
 
