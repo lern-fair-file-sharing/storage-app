@@ -5,19 +5,14 @@ import { StyleSheet, View, Text, ScrollView, RefreshControl } from "react-native
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import FileList from "../components/FileList";
 import FileViewButton from "../components/FileViewButton";
-import FileCard from "../components/FileCard";
 import { FileCardType, FolderCardType } from "../types/FileTypes";
-import FolderContentScreen, { RootStackParamList }  from "../components/FolderContentScreen";
+import FolderContentScreen, { RootStackParamList } from "../components/FolderContentScreen";
 import Colors from "../utils/Colors";
-import { getFolderContent, searchLatestFiles} from "../utils/ServerRequests";
+import { getFolderContent, searchLatestFiles } from "../utils/ServerRequests";
 import { getTimeFrame, LastModified, PERSONAL_SPACE_FOLDER_NAME } from "../utils/utils";
-
-
-enum FileView {
-    Activity,
-    Courses,
-}
-
+import FileSearchBar from "../components/FileSearchBar";
+import { FileView } from "../types/FileViewTypes";
+import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 
 
 const FilesTabScreen = () => {
@@ -25,7 +20,19 @@ const FilesTabScreen = () => {
     const [allFolders, setAllFolders] = useState<FolderCardType[]>( [] as FolderCardType[]);
     const [allFiles, setAllFiles] = useState<FileCardType[]>( [] as FileCardType[]);
     const [latestFiles, setLatestFiles] = useState<FileCardType[]>( [] as FileCardType[]);
+    
+    const [searchResult, setSearchResult] = useState<FileCardType[]>([] as FileCardType[]);
 
+    const setSearchResultHandler = (results: FileCardType[]) => {
+        setSearchResult(results);
+    };
+
+    const setFileViewHandler = (view: FileView) => {
+        setSearchResult([]);
+        fetchLatestFiles();
+        fetchFolderContent();
+        setFileView(view);
+    };
     const FILE_URL = `/remote.php/dav/files/${process.env.EXPO_PUBLIC_USER}/`;
 
     const personalFolderToTop = (folders: FolderCardType[]) => {
@@ -50,7 +57,6 @@ const FilesTabScreen = () => {
         }
     };
     
-    // Fetch latest filles
     const fetchLatestFiles = async () => {
         const results = await searchLatestFiles();
         if (results) {
@@ -71,16 +77,10 @@ const FilesTabScreen = () => {
         fetchAllData();
     }, []);
 
-    const toggleFileView = () => {
-        fetchLatestFiles();
-        fetchFolderContent();
-        setFileView(fileView === FileView.Courses ? FileView.Activity : FileView.Courses);
-    };
-
     const renderFileListSection = (title: string, files: FileCardType[]) => (
         <View style={styles.fileActivitySection}>
             <Text style={styles.fileActivityTime}>{title}:</Text>
-            <FileList folders={[]} files={files} refreshFunction={fetchAllData}/>
+            <FileList folders={[]} files={files} refreshFunction={fetchAllData} />
         </View>
     );
 
@@ -88,7 +88,7 @@ const FilesTabScreen = () => {
         // Split files into groups based on their last-modified time
         const categorizedFiles = latestFiles.reduce((accumulator: any, file: FileCardType) => {
             const timeFrame = getTimeFrame(file.lastModified);
-            
+
             switch (timeFrame) {
                 case LastModified.LAST_THREE_HOURS:
                     accumulator.lastThreeHours.push(file);
@@ -102,14 +102,14 @@ const FilesTabScreen = () => {
                 default:
                     break;
             }
-        
+
             return accumulator;
         }, {
             lastThreeHours: [],
             today: [],
             thisWeek: []
         });
-        
+
         const lastThreeHoursFiles = categorizedFiles.lastThreeHours;
         const todayFiles = categorizedFiles.today;
         const thisWeekFiles = categorizedFiles.thisWeek;
@@ -133,51 +133,71 @@ const FilesTabScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.fileViews}>
-                    <FileViewButton
-                        active={fileView === FileView.Activity}
-                        text="Aktivität"
-                        callback={toggleFileView}
-                        icon={Ionicons}
-                        iconName="notifications"
+
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={styles.fileViews}>
+                        <FileViewButton
+                            active={fileView === FileView.Activity}
+                            text="Aktivität"
+                            callback={() => {
+                                Keyboard.dismiss();
+                                setFileViewHandler(FileView.Activity);
+                            }}
+                            icon={Ionicons}
+                            iconName="notifications"
+                        />
+                        <FileViewButton
+                            active={fileView === FileView.Courses}
+                            text="Kurse"
+                            callback={() => {
+                                Keyboard.dismiss();
+                                setFileViewHandler(FileView.Courses);
+                            }}
+                            icon={FontAwesome}
+                            iconName="group"
+                        />
+                    </View>
+
+                    <FileSearchBar
+                            callback={() => setFileViewHandler(FileView.Search)}
+                            setSearchResultHandler={setSearchResultHandler}
                     />
-                    <FileViewButton
-                        active={fileView === FileView.Courses}
-                        text="Kurse"
-                        callback={toggleFileView}
-                        icon={FontAwesome}
-                        iconName="group"
+
+                    <View
+                        style={{
+                            borderBottomColor: Colors.primary,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                        }}
                     />
+
+                    {
+                        fileView === FileView.Activity ? fileTimeCategorization() :
+                            fileView === FileView.Search ? (
+                                <ScrollView
+                                    style={styles.courseFolderSection}
+                                    refreshControl={
+                                        <RefreshControl refreshing={false} onRefresh={onRefresh} />
+                                    }
+                                >
+                                    <FileList folders={[]} files={searchResult} />
+                                </ScrollView>
+                            )
+                                : (
+                                    <ScrollView
+                                        style={styles.courseFolderSection}
+                                        refreshControl={
+                                            <RefreshControl refreshing={false} onRefresh={onRefresh} />
+                                        }
+                                    >
+                                        <FileList folders={allFolders} files={allFiles} refreshFunction={fetchAllData} />
+                                    </ScrollView>
+                                )
+                    }
                 </View>
-
-                <View style={styles.searchSection}>
-                    {/* TODO create and add search component */}
-                </View>
-
-                <View
-                    style={{
-                        borderBottomColor: Colors.primary,
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                    }}
-                />
-
-                {
-                    fileView === FileView.Activity ? fileTimeCategorization()
-                    : ( 
-                        <ScrollView
-                            style={styles.courseFolderSection}
-                            refreshControl={
-                                <RefreshControl refreshing={false} onRefresh={onRefresh} />
-                            }
-                        >
-                            <FileList folders={allFolders} files={allFiles} refreshFunction={fetchAllData}/>
-                        </ScrollView>
-                    )
-                }
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -223,12 +243,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-evenly",
         gap: 20,
     },
-    searchSection: {
-        height: 50,
-        backgroundColor: "#cfcfcf",
-    },
     timeBasedFileActivities: {
-        
+
     },
     fileActivitySection: {
         marginBottom: 10,
