@@ -11,7 +11,7 @@ const host = Constants?.expoConfig?.hostUri
   ? Constants.expoConfig.hostUri.split(":")?.shift()
   : "unkown";
 
-const machineURL = `http://${host}:${process.env.EXPO_PUBLIC_HOST_PORT}`
+const machineURL = `http://localhost:${process.env.EXPO_PUBLIC_HOST_PORT}`
 const user = process.env.EXPO_PUBLIC_USER; 
 const userpath = "/files/" + user;
 
