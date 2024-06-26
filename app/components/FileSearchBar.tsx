@@ -12,7 +12,8 @@ type SearchBarProps = {
 };
 
 const FileSearchBar: React.FunctionComponent<SearchBarProps> = (props: SearchBarProps) => {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState<string>("");
+    const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const updateSearch = async (search: string) => {
         setSearch(search);
@@ -33,8 +34,16 @@ const FileSearchBar: React.FunctionComponent<SearchBarProps> = (props: SearchBar
             value={search}
             containerStyle={styles.searchContainer}
             inputContainerStyle={styles.searchInput}
-            onFocus={() => props.callback()}
-            onBlur={() => setSearch("")}
+            onFocus={() => {
+                setIsFocused(true);
+                props.callback()
+            }}
+            onBlur={() => {
+                setIsFocused(false);
+                setSearch("")
+            }}
+            searchIcon={{ color: isFocused ? Colors.yellow : Colors.lightGray }}
+            placeholderTextColor={isFocused ? Colors.yellow : Colors.lightGray }
         />
     );
 };
