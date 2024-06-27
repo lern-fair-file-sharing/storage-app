@@ -113,7 +113,48 @@ export const searchLatestFiles = async(): Promise<FileCardType[] | void> => {
         .catch((error) => console.error(error));
 };
 
+export const searchFilesByKeyword = async(keyword:String): Promise<FileCardType[] | void> => {
+    const requestHeaders = new Headers();
+    requestHeaders.append("content-Type", "text/xml");
+    requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
+
+    const raw = "<d:searchrequest xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n     <d:basicsearch>\r\n         <d:select>\r\n             <d:prop>\r\n                 <oc:fileid/>\r\n                 <d:displayname/>\r\n                 <d:getcontenttype/>\r\n                 <d:getetag/>\r\n                 <oc:size/>\r\n                 <oc:tags/>\r\n                 <d:getlastmodified/>\r\n                 <d:resourcetype/>\r\n             </d:prop>\r\n         </d:select>\r\n         <d:from>\r\n             <d:scope>\r\n                 <d:href>" + userpath + "</d:href>\r\n                 <d:depth>infinity</d:depth>\r\n             </d:scope>\r\n         </d:from>\r\n         <d:where>\r\n             <d:like>\r\n                <d:prop>\r\n                    <d:displayname/>\r\n                </d:prop>\r\n                <d:literal>%"+ keyword +"%</d:literal>\r\n            </d:like>\r\n         </d:where>\r\n         <d:orderby/>\r\n    </d:basicsearch>\r\n</d:searchrequest>"; 
+
+    const requestOptions = {
+        method: "SEARCH",
+        headers: requestHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    let fileList: FileCardType[] = [];
+
+    return fetch(machineURL +"/remote.php/dav", requestOptions as RequestInit)
+        .then((response) => response.text())
+        .then((result) => {
+            if (result === undefined) {
+                return [];
+            }
+            else {
+            parseString(result, function (err: any, result: any) {
+                result as PropSearchResponseType;
+                result["d:multistatus"]["d:response"].forEach((element: any) => {
+                    let file: FileCardType = {
+                        fileName: element["d:propstat"][0]["d:prop"][0]["d:displayname"][0],
+                        fileType: element["d:propstat"][0]["d:prop"][0]["d:getcontenttype"][0],
+                        fileURL: element["d:href"][0],
+                        tags: element["d:propstat"][0]["d:prop"][0]["oc:tags"][0].split(","),
+                        lastModified: element["d:propstat"][0]["d:prop"][0]["d:getlastmodified"][0]
+                    };
+                    fileList.push(file);
+                });
+            });
+            return fileList;
+            }
+        })
+        .catch((error) => {return [] as FileCardType[];});
+};
 
 export const fetchFile = (fileURL: string): Promise<string | void> => {
     const requestHeaders = new Headers();
@@ -232,10 +273,10 @@ export const createFolder = async (folderURL: string): Promise<boolean | void> =
         redirect: "follow"
     };
 
-    fetch(machineURL+folderURL, requestOptions as RequestInit)
+    fetch(machineURL + folderURL, requestOptions as RequestInit)
         .then((response) => response.text())
-        .then((result) => {return true})
-        .catch((error) => {console.error(error); return false});
+        .then((result) => { return true })
+        .catch((error) => { console.error(error); return false });
 }
 
 export const uploadFile = async (file: Blob, location: string ): Promise<boolean | void> => {

@@ -20,6 +20,7 @@ const Colors =
     onTagGreen: '#266940',
     onTagBlue: '#32578E',
     onTagPurple: '#70398A',
+    lightGray: '#AFBBBE',
 };
 
 export default Colors;
