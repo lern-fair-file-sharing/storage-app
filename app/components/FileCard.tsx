@@ -8,7 +8,8 @@ import Colors from "../utils/Colors";
 import { fetchFile, downloadFile, deleteItem } from "../utils/ServerRequests";
 import { FileCardType } from "../types/FileTypes";
 import * as FileSystem from 'expo-file-system';
-import { WebView } from 'react-native-webview';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Sharing from 'expo-sharing';
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/basic-file-icon.png");
@@ -23,14 +24,12 @@ const FileCard = (props: FileCardProps) => {
     const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
     const [isPreviewVisible, setIsPreviewVisible] = useState<boolean>(false);
     const [pdfBase64, setPdfBase64] = useState<string | null>(null);
-    const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (props.fileType === "application/pdf") {
             const fetchPDF = async () => {
                 try {
                     const base64PDF = await fetchFile(props.fileURL);
-            
                     if (base64PDF) {
                         setPdfBase64(base64PDF);
                         console.log('PDF fetched:', base64PDF.substring(0, 50)); // Check if the PDF is fetched correctly
@@ -41,7 +40,6 @@ const FileCard = (props: FileCardProps) => {
                     console.error('Error fetching PDF:', error);
                 }
             };
-            
             fetchPDF();
             setPreviewImage(pdfPreviewImage);
             setFileType("pdf");
@@ -94,16 +92,41 @@ const FileCard = (props: FileCardProps) => {
             })
     };
 
-    const displayFile = () => {
+    const displayFile = async () => {
         if (fileType === "pdf" && pdfBase64) {
-            convertBase64ToBlob(pdfBase64);
+            try {
+                // Check for and remove the Base64 prefix if it exists
+                const base64Prefix = "base64,";
+                const base64Data = pdfBase64.includes(base64Prefix)
+                    ? pdfBase64.split(base64Prefix)[1]
+                    : pdfBase64;
+                
+                const localUri = `${FileSystem.documentDirectory}${props.fileName}`;
+                await FileSystem.writeAsStringAsync(localUri, base64Data, { encoding: FileSystem.EncodingType.Base64 });
+    
+                if (Platform.OS === "android") {
+                    const contentUri = await FileSystem.getContentUriAsync(localUri);
+                    await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+                        data: contentUri,
+                        flags: 1,
+                        type: "application/pdf"
+                    });
+                } else if (Platform.OS === "ios") {
+                    if (await Sharing.isAvailableAsync()) {
+                        await Sharing.shareAsync(localUri);
+                    } else {
+                        Alert.alert("Error", "Sharing is not available on this device.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error opening PDF:", error);
+                Alert.alert("Error", "Failed to open PDF file.");
+            }
         } else if (fileType === "image") {
             setIsPreviewVisible(true);
         }
     };
-
-    const convertBase64ToBlob = (pdfBase64: string) => 
-        fetch(pdfBase64).then(res => res.blob());
+    
 
     return (
         <TouchableOpacity style={styles.container} onPress={displayFile}>
@@ -124,7 +147,7 @@ const FileCard = (props: FileCardProps) => {
                     duration: 300
                 }}
                 from={(
-                    <TouchableOpacity style={styles.openSettingsButton} onPress={() => setSettingsPopupVisible(true)}>
+                    <TouchableOpacity style={styles.openSettingsButton} onPress={() => { setSettingsPopupVisible(true) }}>
                         <Entypo name="dots-three-vertical" size={20} color={Colors.primary} />
                     </TouchableOpacity>
                 )}>
@@ -148,13 +171,8 @@ const FileCard = (props: FileCardProps) => {
                             source={previewImage}
                             resizeMode="contain"
                         />
-                    ) : fileType === "pdf" && pdfBlobUrl ? (
-                        <WebView
-                            source={{ uri: pdfBlobUrl }}
-                            style={{ flex: 1 }}
-                            onError={() => setIsPreviewVisible(false)}
-                            onLoadEnd={() => setIsPreviewVisible(true)}
-                        />
+                    ) : fileType === "pdf" ? (
+                        <></>
                     ) : (
                         <Text>Error loading file</Text>
                     )}
@@ -162,13 +180,14 @@ const FileCard = (props: FileCardProps) => {
                         style={styles.closeButton}
                         onPress={() => setIsPreviewVisible(false)}
                     >
-                        <Text style={styles.closeButtonText}>X</Text>
+                        <AntDesign name="closesquare" size={35} color={Colors.primary} />
                     </TouchableOpacity>
                 </Modal>
             )}
         </TouchableOpacity>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -239,12 +258,8 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: "absolute",
-        top: 40,
-        right: 20,
-        backgroundColor: Colors.primary,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 5,
+        top: 30,
+        right: 30,
     },
     closeButtonText: {
         color: Colors.surface,
