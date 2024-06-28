@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: Colors.surface,
         borderRadius: 8,
-        marginVertical: 16,
+        marginBottom: 24,
         overflow: 'hidden',
     },
     image: {
