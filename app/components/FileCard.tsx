@@ -58,7 +58,6 @@ const FileCard = (props: FileCardProps) => {
             .then(base64Image => {
                 if (base64Image) {
                     setPreviewImage({ uri: base64Image });
-                    console.log('Image fetched:', base64Image);
                 } else {
                     console.error('Failed to fetch image: No data received.');
                 }
