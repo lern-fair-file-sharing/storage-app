@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Pressable, Modal } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Modal } from "react-native";
 import Popover from "react-native-popover-view";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -6,36 +6,49 @@ import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import Colors from "../utils/Colors";
 import { fetchFile, downloadFile, deleteItem } from "../utils/ServerRequests";
-import { FileCardType} from "../types/FileTypes";
-
+import { FileCardType } from "../types/FileTypes";
+import * as FileSystem from 'expo-file-system';
+import { WebView } from 'react-native-webview';
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/basic-file-icon.png");
 
-
 interface FileCardProps extends FileCardType {
     cardRemovalHandler: () => void
 }
-
 
 const FileCard = (props: FileCardProps) => {
     const [previewImage, setPreviewImage] = useState<{ uri: string | any }>();
     const [fileType, setFileType] = useState<string>("unknown");
     const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
     const [isPreviewVisible, setIsPreviewVisible] = useState<boolean>(false);
+    const [pdfBase64, setPdfBase64] = useState<string | null>(null);
+    const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        // Choose preview image (choices: PDF default, preview image from URL, placeholder image)
         if (props.fileType === "application/pdf") {
+            const fetchPDF = async () => {
+                try {
+                    const base64PDF = await fetchFile(props.fileURL);
+            
+                    if (base64PDF) {
+                        setPdfBase64(base64PDF);
+                        console.log('PDF fetched:', base64PDF.substring(0, 50)); // Check if the PDF is fetched correctly
+                    } else {
+                        console.error('Failed to fetch PDF: No data received.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching PDF:', error);
+                }
+            };
+            
+            fetchPDF();
             setPreviewImage(pdfPreviewImage);
             setFileType("pdf");
-        }
-        else if (props.fileType.split("/")[0] === "image") {
-            
+        } else if (props.fileType.split("/")[0] === "image") {
             fetchImage();
             setFileType("image");
-        }
-        else {
+        } else {
             setPreviewImage(noPreviewImage);
         }
     }, [props.fileType, props.fileURL]);
@@ -43,13 +56,18 @@ const FileCard = (props: FileCardProps) => {
     const fetchImage = () => {
         fetchFile(props.fileURL)
             .then(base64Image => {
-                setPreviewImage({ uri: base64Image });
+                if (base64Image) {
+                    setPreviewImage({ uri: base64Image });
+                    console.log('Image fetched:', base64Image);
+                } else {
+                    console.error('Failed to fetch image: No data received.');
+                }
             })
             .catch(error => {
                 console.error(error);
             });
     };
-    
+
     const handleDownloadFile = () => {
         downloadFile(props.fileURL)
             .then(status => {
@@ -78,10 +96,15 @@ const FileCard = (props: FileCardProps) => {
     };
 
     const displayFile = () => {
-      if (Platform.OS === "ios") {
-        setIsPreviewVisible(true);
-      }
-    };    
+        if (fileType === "pdf" && pdfBase64) {
+            convertBase64ToBlob(pdfBase64);
+        } else if (fileType === "image") {
+            setIsPreviewVisible(true);
+        }
+    };
+
+    const convertBase64ToBlob = (pdfBase64: string) => 
+        fetch(pdfBase64).then(res => res.blob());
 
     return (
         <TouchableOpacity style={styles.container} onPress={displayFile}>
@@ -117,24 +140,33 @@ const FileCard = (props: FileCardProps) => {
                     </TouchableOpacity>
                 </View>
             </Popover>
-            {Platform.OS === "ios" && (
-              <Modal visible={isPreviewVisible} animationType="slide">
-                {fileType === "image" ? (
-                  <Image
-                    style={styles.imagePreview}
-                    source={previewImage}
-                  />
-                ) : (
-                  <Text>Error</Text>
-                )}
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setIsPreviewVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
-              </Modal>
-      )}
+
+            {isPreviewVisible && (
+                <Modal visible={isPreviewVisible} animationType="slide">
+                    {fileType === "image" ? (
+                        <Image
+                            style={styles.imagePreview}
+                            source={previewImage}
+                            resizeMode="contain"
+                        />
+                    ) : fileType === "pdf" && pdfBlobUrl ? (
+                        <WebView
+                            source={{ uri: pdfBlobUrl }}
+                            style={{ flex: 1 }}
+                            onError={() => setIsPreviewVisible(false)}
+                            onLoadEnd={() => setIsPreviewVisible(true)}
+                        />
+                    ) : (
+                        <Text>Error loading file</Text>
+                    )}
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => setIsPreviewVisible(false)}
+                    >
+                        <Text style={styles.closeButtonText}>X</Text>
+                    </TouchableOpacity>
+                </Modal>
+            )}
         </TouchableOpacity>
     );
 };
@@ -207,21 +239,21 @@ const styles = StyleSheet.create({
         fontSize: 17
     },
     closeButton: {
-      position: "absolute",
-      top: 40,
-      right: 20,
-      backgroundColor: Colors.primary,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 5,
+        position: "absolute",
+        top: 40,
+        right: 20,
+        backgroundColor: Colors.primary,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 5,
     },
     closeButtonText: {
-      color: Colors.surface,
-      fontWeight: "bold",
+        color: Colors.surface,
+        fontWeight: "bold",
     },
     imagePreview: {
-      flex: 1,
-      resizeMode: 'contain'
+        flex: 1,
+        resizeMode: 'contain'
     }
 });
 
