@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Colors from '../utils/Colors';
 import ClassCard from '../components/classCard';
-import { time } from 'console';
+
 
 const ClassesPage = () => {
     const classes = [
@@ -11,7 +11,7 @@ const ClassesPage = () => {
             title: 'Mathematik',
             members: '3 von 10 Plätzen belegt',
             year: '5. Klasse',
-            status: 'Öffenlich',         
+            status: 'Öffenlich',
             imageUrl: 'https://picsum.photos/200',
         },
         {
@@ -35,7 +35,7 @@ const ClassesPage = () => {
             title: 'Biologie',
             members: '3 von 10 Plätzen belegt',
             year: '8. Klasse',
-            status: 'Privat',            
+            status: 'Privat',
             imageUrl: 'https://picsum.photos/200',
         },
     ];
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     },
     list: {
         flex: 1,
-        marginTop: 10,
+        margin: 16,
     }
 });
 
