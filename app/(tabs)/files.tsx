@@ -165,7 +165,7 @@ const FilesTabScreen = () => {
 
                 <View
                     style={{
-                        borderBottomColor: Colors.primary,
+                        borderBottomColor: Colors.lightGray,
                         borderBottomWidth: StyleSheet.hairlineWidth,
                     }}
                 />

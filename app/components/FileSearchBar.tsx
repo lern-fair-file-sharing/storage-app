@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { SearchBar } from '@rneui/themed';
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, StyleSheet } from 'react-native';
 import { FileCardType } from "../types/FileTypes";
 import { searchFilesByKeyword } from '../utils/ServerRequests';
 import Colors from '../utils/Colors';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 
 type SearchBarProps = {
@@ -17,50 +17,56 @@ const FileSearchBar: React.FunctionComponent<SearchBarProps> = (props: SearchBar
 
     const updateSearch = async (search: string) => {
         setSearch(search);
-        if (String(search).length < 3) {
+        if (search.length < 3) {
             return;
         }
-        var results = await searchFilesByKeyword(search);
+        const results = await searchFilesByKeyword(search);
 
-        if (results && results !== undefined) {
+        if (results) {
             props.setSearchResultHandler(results);
         }
     };
 
     return (
-        <SearchBar
-            placeholder="Durchsuchen..."
-            onChangeText={updateSearch}
-            value={search}
-            containerStyle={styles.searchContainer}
-            inputContainerStyle={styles.searchInput}
-            onFocus={() => {
-                setIsFocused(true);
-                props.callback()
-            }}
-            onBlur={() => {
-                setIsFocused(false);
-                setSearch("")
-            }}
-            searchIcon={{ color: isFocused ? Colors.yellow : Colors.lightGray }}
-            placeholderTextColor={isFocused ? Colors.yellow : Colors.lightGray }
-        />
+        <View style={[styles.searchContainer, { borderColor: isFocused ? Colors.yellow : Colors.lightGray }]}>
+            <FontAwesome name="search" size={22} color={Colors.yellow} />
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Durchsuchen..."
+                placeholderTextColor={Colors.lightGray}
+                onChangeText={updateSearch}
+                value={search}
+                onFocus={() => {
+                    setIsFocused(true);
+                    props.callback();
+                }}
+                onBlur={() => {
+                    setIsFocused(false);
+                    setSearch("");
+                }}
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     searchContainer: {
-        height: 40,
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 0,
+        paddingLeft: 10,
         backgroundColor: "white",
-        borderColor: Colors.lightGray,
         borderRadius: 100,
         borderWidth: 1,
     },
     searchInput: {
+        flex: 1,
+        backgroundColor: "transparent",
+        borderWidth: 0,
         height: 40,
-        backgroundColor: 'transparent',
-    }
+        paddingLeft: 10,
+        color: Colors.lightGray,
+    },
 });
 
 export default FileSearchBar;
