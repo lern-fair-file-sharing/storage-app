@@ -8,8 +8,9 @@ import Colors from "../utils/Colors";
 import { fetchFile, downloadFile, deleteItem } from "../utils/ServerRequests";
 import { FileCardType } from "../types/FileTypes";
 import * as FileSystem from 'expo-file-system';
-import * as IntentLauncher from 'expo-intent-launcher';
+import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from 'expo-sharing';
+import {Linking } from 'react-native'
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/basic-file-icon.png");
@@ -32,12 +33,13 @@ const FileCard = (props: FileCardProps) => {
                     const base64PDF = await fetchFile(props.fileURL);
                     if (base64PDF) {
                         setPdfBase64(base64PDF);
-                        console.log('PDF fetched:', base64PDF.substring(0, 50)); // Check if the PDF is fetched correctly
-                    } else {
-                        console.error('Failed to fetch PDF: No data received.');
                     }
-                } catch (error) {
-                    console.error('Error fetching PDF:', error);
+                    else {
+                        console.error("Failed to fetch PDF.");
+                    }
+                }
+                catch (error) {
+                    console.error("Failed to fetch PDF. Error:", error);
                 }
             };
             fetchPDF();
@@ -97,11 +99,9 @@ const FileCard = (props: FileCardProps) => {
             try {
                 // Check for and remove the Base64 prefix if it exists
                 const base64Prefix = "base64,";
-                const base64Data = pdfBase64.includes(base64Prefix)
-                    ? pdfBase64.split(base64Prefix)[1]
-                    : pdfBase64;
+                const base64Data = pdfBase64.includes(base64Prefix) ? pdfBase64.split(base64Prefix)[1] : pdfBase64;
                 
-                const localUri = `${FileSystem.documentDirectory}${props.fileName}`;
+                const localUri = `${FileSystem.documentDirectory}${props.fileName.replaceAll(" ", "_")}`;
                 await FileSystem.writeAsStringAsync(localUri, base64Data, { encoding: FileSystem.EncodingType.Base64 });
     
                 if (Platform.OS === "android") {
@@ -112,9 +112,11 @@ const FileCard = (props: FileCardProps) => {
                         type: "application/pdf"
                     });
                 } else if (Platform.OS === "ios") {
+                    Linking.openURL("localUri");
                     if (await Sharing.isAvailableAsync()) {
                         await Sharing.shareAsync(localUri);
-                    } else {
+                    }
+                    else {
                         Alert.alert("Error", "Sharing is not available on this device.");
                     }
                 }
@@ -164,24 +166,22 @@ const FileCard = (props: FileCardProps) => {
             </Popover>
 
             {isPreviewVisible && (
-                <Modal visible={isPreviewVisible} animationType="slide">
-                    {fileType === "image" ? (
-                        <Image
-                            style={styles.imagePreview}
-                            source={previewImage}
-                            resizeMode="contain"
-                        />
-                    ) : fileType === "pdf" ? (
-                        <></>
-                    ) : (
-                        <Text>Error loading file</Text>
-                    )}
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => setIsPreviewVisible(false)}
-                    >
-                        <AntDesign name="closesquare" size={35} color={Colors.primary} />
-                    </TouchableOpacity>
+                <Modal visible={isPreviewVisible} animationType="slide" transparent={true}>
+                    <View style={styles.previewModal}>
+                        {fileType === "image" ? (
+                            <Image style={styles.imagePreview} source={previewImage} />
+                        ) : fileType === "pdf" ? (
+                            <></>
+                        ) : (
+                            <Text>Error loading file</Text>
+                        )}
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setIsPreviewVisible(false)}
+                        >
+                            <AntDesign name="closesquare" size={35} color="#fff" />
+                        </TouchableOpacity>
+                    </View>
                 </Modal>
             )}
         </TouchableOpacity>
@@ -266,8 +266,14 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     imagePreview: {
-        flex: 1,
+        height: "75%",
         resizeMode: 'contain'
+    },
+    previewModal: {
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.9)"
     }
 });
 
