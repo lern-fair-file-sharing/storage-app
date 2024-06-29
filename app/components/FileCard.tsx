@@ -198,7 +198,7 @@ const FileCard = (props: FileCardProps) => {
                                             });
                                     }}
                                 >
-                                    <Text style={styles.noticeText}>Download PDF to see all pages.</Text>
+                                    <Text style={styles.noticeText}>PDF herunterladen, um alle Seiten zu sehen.</Text>
                                 </TouchableOpacity>
                             </>
 
