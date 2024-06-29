@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Modal } from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ToastAndroid, Platform, Alert, Modal, ScrollView } from "react-native";
 import Popover from "react-native-popover-view";
 import { Entypo } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -10,7 +10,9 @@ import { FileCardType } from "../types/FileTypes";
 import * as FileSystem from 'expo-file-system';
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from 'expo-sharing';
-import {Linking } from 'react-native'
+import * as Linking from 'expo-linking';
+import WebView from "react-native-webview";
+
 
 const pdfPreviewImage = require("../../assets/pdf-icon.png");
 const noPreviewImage = require("../../assets/basic-file-icon.png");
@@ -25,6 +27,7 @@ const FileCard = (props: FileCardProps) => {
     const [settingsPopupVisible, setSettingsPopupVisible] = useState<boolean>(false);
     const [isPreviewVisible, setIsPreviewVisible] = useState<boolean>(false);
     const [pdfBase64, setPdfBase64] = useState<string | null>(null);
+    const [webViewUri, setWebViewUri] = useState('');
 
     useEffect(() => {
         if (props.fileType === "application/pdf") {
@@ -112,13 +115,16 @@ const FileCard = (props: FileCardProps) => {
                         type: "application/pdf"
                     });
                 } else if (Platform.OS === "ios") {
-                    Linking.openURL("localUri");
-                    if (await Sharing.isAvailableAsync()) {
-                        await Sharing.shareAsync(localUri);
-                    }
-                    else {
-                        Alert.alert("Error", "Sharing is not available on this device.");
-                    }
+                    const htmlContent = `
+                        <!DOCTYPE html>
+                        <html>
+                            <body>
+                                <embed width="100%" height="100%" src="data:application/pdf;base64,${base64Data}" type="application/pdf">
+                            </body>
+                        </html>
+                    `;
+                    setWebViewUri(htmlContent);
+                    setIsPreviewVisible(true);
                 }
             } catch (error) {
                 console.error("Error opening PDF:", error);
@@ -170,8 +176,32 @@ const FileCard = (props: FileCardProps) => {
                     <View style={styles.previewModal}>
                         {fileType === "image" ? (
                             <Image style={styles.imagePreview} source={previewImage} />
-                        ) : fileType === "pdf" ? (
-                            <></>
+                        ) : fileType === "pdf" && Platform.OS === "ios" ? (
+                            <>
+                                <WebView
+                                    useWebKit={true}
+                                    originWhitelist={['*']}
+                                    scrollEnabled={true}
+                                    mediaPlaybackRequiresUserAction={true}
+                                    source={{ html: webViewUri }}
+                                />
+                                <TouchableOpacity
+                                    style={styles.downloadNoticeButton}
+                                    onPress={() => {
+                                        downloadFile(props.fileURL)
+                                            .then(status => {
+                                                setIsPreviewVisible(false)
+                                            })
+                                            .catch(error => {
+                                                console.error('Download File Error:', error);
+                                                Alert.alert("Download Failed", "An unexpected error occurred while downloading the file.");
+                                            });
+                                    }}
+                                >
+                                    <Text style={styles.noticeText}>Download PDF to see all pages.</Text>
+                                </TouchableOpacity>
+                            </>
+
                         ) : (
                             <Text>Error loading file</Text>
                         )}
@@ -179,7 +209,7 @@ const FileCard = (props: FileCardProps) => {
                             style={styles.closeButton}
                             onPress={() => setIsPreviewVisible(false)}
                         >
-                            <AntDesign name="closesquare" size={35} color="#fff" />
+                            <AntDesign name="closesquare" size={35} color={fileType === "pdf" ? Colors.primary : "#fff"} />
                         </TouchableOpacity>
                     </View>
                 </Modal>
@@ -258,8 +288,22 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: "absolute",
-        top: 30,
-        right: 30,
+        top: 35,
+        right: 35,
+    },
+    downloadNoticeButton: {
+        position: "absolute",
+        top: 35,
+        left: 35,
+        height: 35,
+        borderRadius: 3,
+        backgroundColor: Colors.primary,
+        display: "flex",
+        paddingHorizontal: 10,
+        justifyContent: "center"
+    },
+    noticeText: {
+        color: "#fff"
     },
     closeButtonText: {
         color: Colors.surface,
@@ -274,6 +318,9 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         backgroundColor: "rgba(0, 0, 0, 0.9)"
+    },
+    pdfIOSPopup: {
+        height: "100%"
     }
 });
 
