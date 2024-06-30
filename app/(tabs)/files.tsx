@@ -133,71 +133,68 @@ const FilesTabScreen = () => {
     }
 
     return (
-
-        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.fileViews}>
-                        <FileViewButton
-                            active={fileView === FileView.Activity}
-                            text="Aktivität"
-                            callback={() => {
-                                Keyboard.dismiss();
-                                setFileViewHandler(FileView.Activity);
-                            }}
-                            icon={Ionicons}
-                            iconName="notifications"
-                        />
-                        <FileViewButton
-                            active={fileView === FileView.Courses}
-                            text="Kurse"
-                            callback={() => {
-                                Keyboard.dismiss();
-                                setFileViewHandler(FileView.Courses);
-                            }}
-                            icon={FontAwesome}
-                            iconName="group"
-                        />
-                    </View>
-
-                    <FileSearchBar
-                            callback={() => setFileViewHandler(FileView.Search)}
-                            setSearchResultHandler={setSearchResultHandler}
-                    />
-
-                    <View
-                        style={{
-                            borderBottomColor: Colors.primary,
-                            borderBottomWidth: StyleSheet.hairlineWidth,
+        <View style={styles.container}>
+            <View style={styles.content}>
+                <View style={styles.fileViews}>
+                    <FileViewButton
+                        active={fileView === FileView.Activity}
+                        text="Aktivität"
+                        callback={() => {
+                            Keyboard.dismiss();
+                            setFileViewHandler(FileView.Activity);
                         }}
+                        icon={Ionicons}
+                        iconName="notifications"
                     />
+                    <FileViewButton
+                        active={fileView === FileView.Courses}
+                        text="Kurse"
+                        callback={() => {
+                            Keyboard.dismiss();
+                            setFileViewHandler(FileView.Courses);
+                        }}
+                        icon={FontAwesome}
+                        iconName="group"
+                    />
+                </View>
 
-                    {
-                        fileView === FileView.Activity ? fileTimeCategorization() :
-                            fileView === FileView.Search ? (
+                <FileSearchBar
+                        callback={() => setFileViewHandler(FileView.Search)}
+                        setSearchResultHandler={setSearchResultHandler}
+                />
+
+                <View
+                    style={{
+                        borderBottomColor: Colors.lightGray,
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                    }}
+                />
+
+                {
+                    fileView === FileView.Activity ? fileTimeCategorization() :
+                        fileView === FileView.Search ? (
+                            <ScrollView
+                                style={styles.courseFolderSection}
+                                refreshControl={
+                                    <RefreshControl refreshing={false} onRefresh={onRefresh} />
+                                }
+                            >
+                                <FileList folders={[]} files={searchResult} />
+                            </ScrollView>
+                        )
+                            : (
                                 <ScrollView
                                     style={styles.courseFolderSection}
                                     refreshControl={
                                         <RefreshControl refreshing={false} onRefresh={onRefresh} />
                                     }
                                 >
-                                    <FileList folders={[]} files={searchResult} />
+                                    <FileList folders={allFolders} files={allFiles} refreshFunction={fetchAllData} />
                                 </ScrollView>
                             )
-                                : (
-                                    <ScrollView
-                                        style={styles.courseFolderSection}
-                                        refreshControl={
-                                            <RefreshControl refreshing={false} onRefresh={onRefresh} />
-                                        }
-                                    >
-                                        <FileList folders={allFolders} files={allFiles} refreshFunction={fetchAllData} />
-                                    </ScrollView>
-                                )
-                    }
-                </View>
+                }
             </View>
-        </TouchableWithoutFeedback>
+        </View>
     );
 };
 
@@ -252,7 +249,7 @@ const styles = StyleSheet.create({
         gap: 7
     },
     fileActivityTime: {
-        color: Colors.primary
+        color: Colors.lightGray
     },
     courseFolderSection: {
     },
