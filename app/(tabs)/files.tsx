@@ -120,7 +120,6 @@ const FilesTabScreen = () => {
 
         return (
             <ScrollView
-                style={styles.timeBasedFileActivities}
                 refreshControl={
                     <RefreshControl refreshing={false} onRefresh={onRefresh} />
                 }
@@ -165,7 +164,7 @@ const FilesTabScreen = () => {
 
                 <View
                     style={{
-                        borderBottomColor: Colors.lightGray,
+                        borderBottomColor: Colors.gray,
                         borderBottomWidth: StyleSheet.hairlineWidth,
                     }}
                 />
