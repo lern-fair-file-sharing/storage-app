@@ -307,7 +307,6 @@ export const changeLastModifiedNow = async (fileURL: string): Promise<boolean | 
     requestHeaders.append("Authorization", `Basic ${process.env.EXPO_PUBLIC_TOKEN}`);
 
     let lastModified = new Date().toUTCString();
-    console.debug(lastModified);
 
     const raw = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<d:propertyupdate xmlns:d=\"DAV:\" xmlns:oc=\"http://owncloud.org/ns\">\r\n  <d:set>\r\n    <d:prop>\r\n      <d:getlastmodified>" + lastModified + "</d:getlastmodified>\r\n    </d:prop>\r\n  </d:set>\r\n</d:propertyupdate>";
 
