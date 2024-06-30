@@ -240,9 +240,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-evenly",
         gap: 20,
     },
-    timeBasedFileActivities: {
-
-    },
     fileActivitySection: {
         marginBottom: 10,
         gap: 7
