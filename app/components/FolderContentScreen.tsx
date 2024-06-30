@@ -3,7 +3,7 @@ import FileList from "./FileList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
 import React, { useEffect, useState, useLayoutEffect, useCallback } from "react";
-import { getFolderContent, uploadFile, createFolder } from "../utils/ServerRequests";
+import { getFolderContent, uploadFile, createFolder, changeLastModifiedNow } from "../utils/ServerRequests";
 import { FolderCardType, FileCardType } from "../types/FileTypes";
 import Feather from "@expo/vector-icons/Feather";
 import { AntDesign } from "@expo/vector-icons";
@@ -56,14 +56,22 @@ const FolderContentScreen = (props: NativeStackScreenProps<RootStackParamList, "
 
     const [newFolderName, setNewFolderName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+    const [newFileName, setNewFileName] = useState('' as string);
 
     const uploadFileHandler = async () => {
         try {
             pickFileFromDevice().then((uploadedFileData) => {
                 if (uploadedFileData) {
+                    setNewFileName(uploadedFileData.fileName);
                     return uploadFile(uploadedFileData.blob, `${props.route.params?.folderURL}${encodeURI(uploadedFileData.fileName)}`);
                 }
             }).then((status) => {
+                try {
+                    changeLastModifiedNow(props.route.params?.folderURL+newFileName);
+                }
+                catch {
+                    console.debug("Failed to change last modified date of file.");
+                }
                 if (status) {
                     if (Platform.OS === "android") {
                         ToastAndroid.show("File uploaded!", ToastAndroid.SHORT);
