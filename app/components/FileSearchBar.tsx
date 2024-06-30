@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         padding: 0,
         backgroundColor: "white",
         borderColor: Colors.lightGray,
-        borderRadius: 100,
+        borderRadius: 8,
         borderWidth: 1,
     },
     searchInput: {
