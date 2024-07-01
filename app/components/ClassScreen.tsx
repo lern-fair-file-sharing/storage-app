@@ -2,7 +2,7 @@ import { StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Text, View, P
 import FileList from "./FileList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
-import React, { useEffect, useState, useLayoutEffect, useCallback } from "react";
+import React, { useEffect, useState, useLayoutEffect, useCallback, useRef } from "react";
 import { getFolderContent, uploadFile, createFolder } from "../utils/ServerRequests";
 import { FolderCardType, FileCardType } from "../types/FileTypes";
 import { AntDesign } from "@expo/vector-icons";
@@ -22,10 +22,20 @@ export type RootStackParamList = {
 
 const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScreen">) => {
     const navigation = useNavigation();
+    const chatContentRef = useRef<ScrollView>(null);
+
     const courseFolderURL = `/remote.php/dav/files/${process.env.EXPO_PUBLIC_USER}/${encodeURI(props.route.params?.title)}/`;
 
     const [attachPopupIsVisible, setAttachPopupIsVisible] = useState<boolean>(false);
+    const [messages, setMessages] = useState<ChatMessageType []>([]);
+    const [currentMessage, setCurrentMessage] = useState<string | undefined>();
 
+    type ChatMessageType = {
+        sender: string,
+        content: string,
+        time: string,
+        isFile: boolean
+    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -33,17 +43,59 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
         });
     }, [navigation]);
 
-    const uploadFileHandler = async () => {
+    useEffect(() => {
+        // Always scroll to the end when a new message enters the chat
+        if (chatContentRef.current) {
+            chatContentRef.current.scrollToEnd({ animated: true });
+        }
+    }, [messages]);
 
+    useEffect(() => {
+        setMessages([
+            {
+                sender: "anonymous",
+                content: "1 Ipsum. Lorem Ipsum. Lorem Ipsum. Lorem Ipsum.",
+                time: "23:07",
+                isFile: false
+            },
+            {
+                sender: "self",
+                content: "ok.",
+                time: "23:07",
+                isFile: false
+            },
+            {
+                sender: "anonymous",
+                content: "3 Ipsum. Lom. Lorem Ipsum. Lorem Ipsum.",
+                time: "23:07",
+                isFile: false
+            },
+        ]);
+    }, []);
+
+    const uploadFileHandler = async () => {
         try {
             pickFileFromDevice().then((uploadedFileData) => {
                 if (uploadedFileData) {
-                    return uploadFile(uploadedFileData.blob, `${courseFolderURL}${encodeURI(uploadedFileData.fileName)}`);
+                    return uploadFile(uploadedFileData.blob, `${courseFolderURL}${encodeURI(uploadedFileData.fileName)}`)
+                    .then((status) => {
+                        if (!status) {
+                            throw new Error("Failed to upload file!");
+                        }
+                        return uploadedFileData.fileName;
+                    });
                 }
-            }).then((status) => {
-                if (!status) {
+            }).then((fileName) => {
+                if (!fileName) {
                     throw new Error("Failed to upload file!");
                 }
+                const newMessage: ChatMessageType = {
+                    sender: "self",
+                    content: fileName,
+                    time: getSendTime(),
+                    isFile: true
+                }
+                setMessages([...messages, newMessage]);
             }).catch((error) => {
                 throw error;
             });   
@@ -63,6 +115,15 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
             })
             .then(blob => {
                 uploadFile(blob, `${courseFolderURL}${encodeURI(fileName)}`);
+            })
+            .then(() => {
+                const newMessage: ChatMessageType = {
+                    sender: "self",
+                    content: localFileURI,
+                    time: getSendTime(),
+                    isFile: true
+                }
+                setMessages([...messages, newMessage]);
             })
             .catch(error => {
                 throw error;
@@ -101,11 +162,39 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
         setAttachPopupIsVisible(false);
     };
 
+    const createTextBubbles = () => {
+        return messages.map((message: ChatMessageType) => {
+            let ownMessage = message.sender === "self";
+            return (
+                <View
+                    style={[styles.chatRow, {alignItems: ownMessage ? "flex-end" : "flex-start"}]}
+                >
+                    <View
+                        style={[styles.chatBubble, {backgroundColor: ownMessage ? Colors.primary : Colors.secondary}]}
+                    >
+                        <Text style={styles.chatText}>{message.content}</Text>
+                        <Text style={styles.chatTime}>{message.time}</Text>
+                    </View>
+                </View>
+            );
+        });
+    }
+
+    const getSendTime = () => {
+        const now = new Date();  
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        return `${hours}:${minutes}`;
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.chatContainer}>
-                <ScrollView style={styles.chatContent}>
-
+                <ScrollView
+                    style={styles.chatContent}
+                    ref={chatContentRef}
+                >
+                    {createTextBubbles()}
                 </ScrollView>
                 <View style={styles.sendMessageContainer}>
                     <View style={styles.chatInputContainer}>
@@ -114,9 +203,10 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
                             placeholder="Nachricht schreiben..."
                             multiline={true}
                             placeholderTextColor={Colors.secondary}
+                            value={currentMessage}
+                            onChangeText={(s) => { setCurrentMessage(s) }}
                         />
                         <View style={styles.attachButtons}>
-
                             <Popover
                                 isVisible={attachPopupIsVisible}
                                 onRequestClose={() => setAttachPopupIsVisible(false)}
@@ -144,10 +234,26 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
                                 <Feather name="camera" size={23} color={Colors.secondary} />
                             </TouchableOpacity>
                         </View>
-
                     </View>
                     
-                    <TouchableOpacity style={styles.sendButton}>
+                    <TouchableOpacity style={styles.sendButton} onPress={() => {
+                        if (!currentMessage) {
+                            return;
+                        }
+
+                        const now = new Date();  
+                        const hours = String(now.getHours()).padStart(2, "0");
+                        const minutes = String(now.getMinutes()).padStart(2, "0");
+
+                        const newMessage: ChatMessageType = {
+                            sender: "self",
+                            content: currentMessage,
+                            time: getSendTime(),
+                            isFile: false
+                        }
+                        setMessages([...messages, newMessage]);
+                        setCurrentMessage(undefined);
+                    }}>
                         <Ionicons name="send" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -161,20 +267,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        height: "100%",
-        gap: 7,
         padding: 24,
-    },
-    chatContainer: {
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        gap: 24,
-    },
-    chatContent: {
-        backgroundColor: Colors.surface,
-        opacity: 0.5,
-        borderRadius: 8,
     },
     sendMessageContainer: {
         display: "flex",
@@ -225,7 +318,6 @@ const styles = StyleSheet.create({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        float: "bottom"
     },
     settingModal: {
         width: 250,
@@ -238,7 +330,6 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 3,
         height: 75,
-        backgroundColor: Colors.surface,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
@@ -254,6 +345,39 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 35,
         right: 35,
+    },
+    chatContainer: {
+        flex: 1,
+        display: "flex",
+        gap: 10,
+    },
+    chatContent: {
+        borderRadius: 8,
+        display: "flex",
+        flexDirection: "column",
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.lightGray,
+    },
+    chatRow: {
+        marginBottom: 10,
+        display: "flex",
+    },
+    chatBubble: {
+        maxWidth: "90%",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        gap: 5
+    },
+    chatText: {
+        color: "white",
+        fontSize: 15
+    },
+    chatTime: {
+        fontSize: 10,
+        color: "white",
+        width: "100%",
+        marginLeft: "auto"
     }
 })
 
