@@ -21,42 +21,7 @@ interface CourseCardDataType {
 
 
 const ClassListScreen = () => {
-    /*const classes = [
-        {
-            time: 'Dienstag, 13:00',
-            title: 'Mathematik',
-            members: '3 von 10 Plätzen belegt',
-            year: '5. Klasse',
-            status: 'Öffenlich',
-            imageUrl: 'https://picsum.photos/200',
-        },
-        {
-            time: 'Mittwoch, 14:00',
-            title: 'Physik',
-            members: '3 von 10 Plätzen belegt',
-            year: '6. Klasse',
-            status: 'Privat',
-            imageUrl: 'https://picsum.photos/200',
-        },
-        {
-            time: 'Donnerstag, 15:00',
-            title: 'Chemie',
-            members: '3 von 10 Plätzen belegt',
-            year: '7. Klasse',
-            status: 'Öffenlich',
-            imageUrl: 'https://picsum.photos/200',
-        },
-        {
-            time: 'Freitag, 16:00',
-            title: 'Biologie',
-            members: '3 von 10 Plätzen belegt',
-            year: '8. Klasse',
-            status: 'Privat',
-            imageUrl: 'https://picsum.photos/200',
-        },
-    ];*/
     const navigation = useNavigation();
-
     const [courseData, setCourseData] = useState<CourseCardDataType[]>([]);
 
     useEffect(() => {
