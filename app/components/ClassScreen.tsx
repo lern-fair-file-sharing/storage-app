@@ -19,6 +19,7 @@ export type RootStackParamList = {
 
 const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScreen">) => {
     const navigation = useNavigation();
+    //const [inputHeight, setInputHeight] = useState(50);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -40,7 +41,7 @@ const ClassScreen = (props: NativeStackScreenProps<RootStackParamList, "ClassScr
                             multiline={true}
                             placeholderTextColor={Colors.secondary}
                         />
-                        <View style={styles.attackButtons}>
+                        <View style={styles.attachButtons}>
                             <TouchableOpacity style={styles.attachButton}>
                                 <Ionicons name="attach" size={30} color={Colors.secondary} />
                             </TouchableOpacity>
@@ -78,27 +79,25 @@ const styles = StyleSheet.create({
     chatContent: {
         backgroundColor: Colors.surface,
         opacity: 0.5,
-        borderRadius: 8
+        borderRadius: 8,
     },
     sendMessageContainer: {
-        height: 50,
         display: "flex",
+        maxHeight: 125,
         flexDirection: "row",
         justifyContent: "space-evenly",
-        gap: 10
+        alignItems: "flex-end",
+        gap: 10,
     },
     chatInputContainer: {
         flex: 1,
+        height: "100%",
         borderRadius: 8,
         backgroundColor: Colors.lightGray,
         display: "flex",
         flexDirection: "row",
-    },
-    attackButtons: {
-        display: "flex",
-        flexDirection: "row",
-        gap: 7,
-        paddingRight: 7,
+        justifyContent: "flex-end",
+        paddingHorizontal: 10
     },
     chatInputField: {
         flex: 1,
@@ -107,21 +106,31 @@ const styles = StyleSheet.create({
         color: "black",
         paddingVertical: 10,
         paddingLeft: 15,
-        fontSize: 15
+        fontSize: 15,
+    },
+    attachButtons: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 7,
+        alignItems: "flex-end",
+        justifyContent: "flex-end",
     },
     attachButton: {
         width: 30,
+        height: 50,
         display: "flex",
         justifyContent: "center",
-        alignContent: "center",
+        alignItems: "center",
     },
     sendButton: {
-        aspectRatio: 1,
+        height: 50,
+        width: 50,
         borderRadius: 8,
         backgroundColor: Colors.yellow,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        float: "bottom"
     }
 })
 
