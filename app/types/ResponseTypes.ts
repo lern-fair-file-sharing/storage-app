@@ -45,3 +45,21 @@ export interface PropSearchResponseType {
         }
     }[]
 }
+
+export interface TagsResponseType {
+    "d:multistatus": {
+        "d:response": {
+            "d:href": string,
+            "d:propstat": {
+                "d:prop": {
+                    "oc:id": string,
+                    "oc:displayname": string,
+                    "oc:user-visible": boolean,
+                    "oc:user-assignable": boolean,
+                    "oc:can-assign": boolean,
+                },
+                "d:status": string
+            }
+        }
+    }[]
+}
