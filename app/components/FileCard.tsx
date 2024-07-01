@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         minHeight: 60,
         width: "100%",
-        borderRadius: 3,
+        borderRadius: 8,
         borderWidth: 0,
         borderColor: Colors.surfaceOutline,
         display: "flex",
